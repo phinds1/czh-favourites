@@ -1,0 +1,21 @@
+[Unit]
+Description=czh-favorites
+After=network.target
+
+[Service]
+Type=simple
+User=appuser01
+Group=appgroup
+WorkingDirectory=/opt/czh-favorites
+
+Environment="JAVA_OPTS=-Xms384m -Xmx1024m -Djava.net.preferIPv4Addresses=true -Djava.net.preferIPv4Stack=true -Dlogging.config=/opt/czh-favorites/conf/logback-spring.xml -Dserver.address=0.0.0.0"
+
+ExecStart=/opt/jdk-25/bin/java $JAVA_OPTS \
+  -jar /opt/czh-favorites/lib/czh-favorites-app.jar \
+  --spring.config.location=/opt/czh-favorites/conf/application.yml
+
+Restart=on-failure
+LimitNOFILE=102642
+
+[Install]
+WantedBy=multi-user.target

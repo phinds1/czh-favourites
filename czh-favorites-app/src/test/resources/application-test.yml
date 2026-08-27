@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:hsqldb:mem:favourites_test;DB_CLOSE_DELAY=-1
+    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+    username: sa
+    password: ""
+    hikari:
+      pool-name: FavouritesTestPool
+  sql:
+    init:
+      mode: never
+
+management:
+  server:
+    port: 0
+
+logging:
+  level:
+    root: WARN
+    cz.bsl.favourites: DEBUG

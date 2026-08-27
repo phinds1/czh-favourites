@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>cz.bsl.gis</groupId>
+        <artifactId>czh-favourites</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>czh-favorites-app-rpm</artifactId>
+    <packaging>${maven.packaging.type}</packaging>
+    <description>czh-favorites application RPM — Spring Boot fat jar + config + scripts + systemd unit</description>
+
+    <properties>
+        <run.as.user>appuser01</run.as.user>
+        <run.as.group>appgroup</run.as.group>
+        <install.root>/opt/czh-favorites</install.root>
+        <packaging.group>Lottery/Middleware</packaging.group>
+        <rpm.skipSigning>true</rpm.skipSigning>
+        <maven.source.skip>true</maven.source.skip>
+        <maven.packaging.type>pom</maven.packaging.type>
+    </properties>
+
+    <dependencies>
+        <!-- Forces reactor order: the app RPM must build after the spring-boot jar it copies. -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>czh-favorites-app</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>generate rpm</id>
+            <activation>
+                <property>
+                    <name>rpm</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <maven.packaging.type>rpm</maven.packaging.type>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>${maven-dependency-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>springboot-jar</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>czh-favorites-app</artifactId>
+                                            <version>${project.version}</version>
+                                            <!-- exec classifier = repackaged executable fat jar -->
+                                            <classifier>exec</classifier>
+                                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                                            <destFileName>czh-favorites-app.jar</destFileName>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>de.dentrassi.maven</groupId>
+                        <artifactId>rpm</artifactId>
+                        <version>${rpm-plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <group>Lottery/Middleware</group>
+                            <packager>IGT</packager>
+
+                            <rulesets>
+
+                                <ruleset>
+                                    <id>main</id>
+                                    <rules>
+                                        <rule>
+                                            <when>
+                                                <type>directory</type>
+                                            </when>
+                                            <mode>0755</mode>
+                                            <user>${run.as.user}</user>
+                                            <group>${run.as.group}</group>
+                                        </rule>
+                                        <rule>
+                                            <when>
+                                                <type>file</type>
+                                                <prefix>${install.root}</prefix>
+                                            </when>
+                                            <user>${run.as.user}</user>
+                                            <group>${run.as.group}</group>
+                                        </rule>
+                                        <rule>
+                                            <when>
+                                                <type>file</type>
+                                                <suffix>sh</suffix>
+                                            </when>
+                                            <mode>0750</mode>
+                                        </rule>
+                                        <rule>
+                                            <when>
+                                                <type>file</type>
+                                                <suffix>jar</suffix>
+                                            </when>
+                                            <mode>0440</mode>
+                                        </rule>
+                                        <rule>
+                                            <when>
+                                                <type>file</type>
+                                                <suffix>xml</suffix>
+                                            </when>
+                                            <mode>0640</mode>
+                                        </rule>
+                                        <rule>
+                                            <when>
+                                                <type>file</type>
+                                                <suffix>yml</suffix>
+                                            </when>
+                                            <mode>0640</mode>
+                                        </rule>
+                                    </rules>
+                                </ruleset>
+
+                                <ruleset>
+                                    <id>service</id>
+                                    <rules>
+                                        <rule>
+                                            <when>
+                                                <type>file</type>
+                                            </when>
+                                            <mode>0644</mode>
+                                            <user>root</user>
+                                            <group>root</group>
+                                        </rule>
+                                    </rules>
+                                </ruleset>
+
+                            </rulesets>
+
+                            <entries>
+                                <entry>
+                                    <name>${install.root}</name>
+                                    <directory>true</directory>
+                                    <ruleset>main</ruleset>
+                                </entry>
+
+                                <entry>
+                                    <name>/opt/czh-favorites/bin</name>
+                                    <directory>true</directory>
+                                    <ruleset>main</ruleset>
+                                </entry>
+
+                                <entry>
+                                    <name>/var/log/czh-favorites/</name>
+                                    <directory>true</directory>
+                                    <ruleset>main</ruleset>
+                                </entry>
+
+                                <entry>
+                                    <name>/var/run/czh-favorites/</name>
+                                    <directory>true</directory>
+                                    <ruleset>main</ruleset>
+                                </entry>
+
+                                <!-- spring application + logging config -->
+                                <entry>
+                                    <name>/opt/czh-favorites/conf</name>
+                                    <collect>
+                                        <from>${basedir}/src/main/resources/config</from>
+                                        <includes>*.yml,*.xml</includes>
+                                    </collect>
+                                    <ruleset>main</ruleset>
+                                    <user>${run.as.user}</user>
+                                    <group>${run.as.group}</group>
+                                </entry>
+
+                                <!-- spring-boot jar -->
+                                <entry>
+                                    <name>/opt/czh-favorites/lib</name>
+                                    <collect>
+                                        <from>${project.build.directory}/libs</from>
+                                    </collect>
+                                    <ruleset>main</ruleset>
+                                    <user>${run.as.user}</user>
+                                    <group>${run.as.group}</group>
+                                </entry>
+
+                                <!-- scripts -->
+                                <entry>
+                                    <name>/opt/czh-favorites/bin</name>
+                                    <collect>
+                                        <from>${basedir}/src/main/resources/bin</from>
+                                    </collect>
+                                    <ruleset>main</ruleset>
+                                </entry>
+
+                                <!-- symlink: config dir -->
+                                <entry>
+                                    <name>/etc/czh-favorites</name>
+                                    <linkTo>/opt/czh-favorites/conf</linkTo>
+                                    <user>${run.as.user}</user>
+                                    <group>${run.as.group}</group>
+                                </entry>
+
+                                <!-- symlink: log dir -->
+                                <entry>
+                                    <name>/opt/czh-favorites/log</name>
+                                    <linkTo>/var/log/czh-favorites</linkTo>
+                                    <user>${run.as.user}</user>
+                                    <group>${run.as.group}</group>
+                                </entry>
+
+                                <!-- systemd unit -->
+                                <entry>
+                                    <name>/etc/systemd/system/czh-favorites.service</name>
+                                    <file>${basedir}/src/main/resources/service/czh-favorites.service</file>
+                                    <ruleset>service</ruleset>
+                                </entry>
+
+                                <!-- convenience symlinks -->
+                                <entry>
+                                    <name>/opt/czh-favorites/bin/start</name>
+                                    <linkTo>/opt/czh-favorites/bin/start-service.sh</linkTo>
+                                    <ruleset>main</ruleset>
+                                </entry>
+                                <entry>
+                                    <name>/opt/czh-favorites/bin/stop</name>
+                                    <linkTo>/opt/czh-favorites/bin/stop-service.sh</linkTo>
+                                    <ruleset>main</ruleset>
+                                </entry>
+                                <entry>
+                                    <name>/opt/czh-favorites/bin/status</name>
+                                    <linkTo>/opt/czh-favorites/bin/status-service.sh</linkTo>
+                                    <ruleset>main</ruleset>
+                                </entry>
+                                <entry>
+                                    <name>/opt/czh-favorites/bin/version</name>
+                                    <linkTo>/opt/czh-favorites/bin/version.sh</linkTo>
+                                    <ruleset>main</ruleset>
+                                </entry>
+                            </entries>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-install-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

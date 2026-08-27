@@ -1,0 +1,21 @@
+terminator=;
+continue-on-error=false
+author=czhdev
+logging=debug
+
+[changeset:create_fav_group_table]
+
+CREATE TABLE GIS_FAV_GROUP (
+    FAV_GROUP_ID   BIGINT        NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    PLAYER_ID      VARCHAR(64)   NOT NULL,
+    GROUP_NUMBER   VARCHAR(10)   NOT NULL,
+    GROUP_NAME     VARCHAR(255)  NOT NULL DEFAULT '',
+    FLAGS          INTEGER       NOT NULL DEFAULT 0,
+    CREATED_AT     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_AT     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT UQ_FAV_GROUP UNIQUE (PLAYER_ID, GROUP_NUMBER)
+);
+
+[validation:fav_group_table_exists]
+
+SELECT COUNT(*) FROM syscat.tables WHERE tabname='GIS_FAV_GROUP';

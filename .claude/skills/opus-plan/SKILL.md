@@ -1,0 +1,45 @@
+---
+name: opus-plan
+description: use Claude Opus to plan development for Claude Sonnet
+allowed-tools: java, bash
+---
+
+Rather than implementing any code, output should be a markdown file in
+`.planning/plans/xxxx_PLAN.md` that contains a phased implementation plan where each
+phase fits in the Claude Sonnet 4.6 context window.
+
+The filename slug `XXX` should be a short upper case description of the plan
+(e.g. `GEANY_PROGRESS_PLAN.md`, `XXX_PLAN.md`).
+
+No changes should be made other than writing the one new plan document and registering
+the plan with the Geany progress sidebar.
+
+## Register the plan with the sidebar
+
+If running in geany...
+After writing the plan file, run `~/bin/geany-progress init` to register it:
+
+```sh
+~/bin/geany-progress init -f ".planning/plans/XXX_PLAN.md" "Plan Name" \
+    "Phase 1 title" "Phase 2 title" ...
+```
+
+This pairs the sidebar entry with the plan file so clicking the title opens it in Geany.
+If `$GEANY_PROGRESS_SOCK` is not set or the socket does not exist, skip silently.
+
+## Phase completion markers
+
+At the end of each phase section, include the exact `~/bin/geany-progress done` command that
+Claude Sonnet should run after completing that phase:
+
+```sh
+~/bin/geany-progress done N [-r path[:line]]... [-w "warning"]...
+```
+
+where N is the 1-based phase number. Include `-r` flags for the key files the human
+should review and `-w` flags for any important caveats or trade-offs.
+
+Progress state is tracked in `.planning/state/XXX_PROGRESS.md` (written automatically
+by the geanyprogress plugin after each `~/bin/geany-progress done` call).
+
+After writing the plan agent should run (exactly) `sudo /usr/bin/updatedb` so locate can find the plan

@@ -1,0 +1,56 @@
+trigger: none
+
+pr:
+  autoCancel: true
+  drafts: true
+  paths:
+    exclude:
+      - README.md
+      - RELEASE_PROCESS.md
+      - doc/*
+
+variables:
+  - group: ado-group
+  - group: github-token
+  - group: msteams
+
+resources:
+  repositories:
+    - repository: azureTemplate
+      type: github
+      name: igt-LotteryServiceDelivery/azure-github-templates
+      endpoint: igt-LotteryServiceDelivery
+      ref: refs/tags/0.0.11
+
+jobs:
+  - job: Build
+    timeoutInMinutes: 120
+    pool: $(siteCode) Non-Production Pool 4cpu
+    workspace:
+      clean: all
+
+    steps:
+
+      - checkout: self
+        path: s
+      - checkout: azureTemplate
+        path: azureTemplate
+        fetchDepth: 0
+        clean: true
+
+      - task: DownloadSecureFile@1
+        name: mvnSettings
+        displayName: 'Download boa-settings.xml'
+        inputs:
+          secureFile: 'boa-settings.xml'
+
+      - template: /.azuredevops/templates/maven/run-maven.yaml@azureTemplate
+        parameters:
+          displayName: 'Maven install'
+          goals: 'clean install'
+          mvnOpts: '-s $(mvnSettings.secureFilePath) -Dmaven.repo.local=.m2 -Dmaven.test.skip=false'
+          jdkVersionOption: '25'
+
+      - template: .azuredevops/templates/sent-msteams-notification.yaml@azureTemplate
+        parameters:
+          MSTEAMS_WEBHOOK: $(TEAMS_BOA_SNAPSHOT)

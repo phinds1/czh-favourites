@@ -1,0 +1,32 @@
+/* gui.css — ARTE-style overrides on Bootstrap Darkly (ported from czh-nginx-gateway reference) */
+body { font-family: 'Courier New', Courier, monospace; font-size: 0.875rem; background-color: #0d0d0d; }
+#cmd-input:focus { box-shadow: none; color: #00ff88; caret-color: #00ff88; }
+#cmd-input::placeholder { color: #444; font-size: 0.8rem; }
+.nav-tabs .nav-link { color: #aaa; border-color: transparent; font-size: 0.8rem; text-transform: uppercase; padding: 0.3rem 0.8rem; }
+.nav-tabs .nav-link:hover { color: #fff; border-color: transparent; }
+.nav-tabs .nav-link.active { color: #fff; background-color: #1a1a2e; border-color: #444 #444 #1a1a2e; }
+.arte-grid { display: grid; grid-template-columns: minmax(160px, 220px) 1fr; gap: 0; border: 1px solid #333; border-radius: 4px; overflow: hidden; }
+.arte-grid .arte-key { background-color: #111; color: #888; padding: 3px 12px 3px 8px; text-align: right; border-bottom: 1px solid #222; white-space: nowrap; }
+.arte-grid .arte-val { background-color: #0d0d0d; color: #e0e0e0; padding: 3px 8px; border-bottom: 1px solid #222; word-break: break-all; }
+.badge-up { background-color: #198754; }
+.badge-down { background-color: #dc3545; }
+.badge-boot { background-color: #fd7e14; }
+.badge-warn { background-color: #ffc107; color: #000; }
+.badge-ok { background-color: #0d6efd; }
+.snapshot-section { color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; border-bottom: 1px solid #333; padding-bottom: 3px; margin-bottom: 6px; margin-top: 14px; }
+.arte-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.arte-table th { color: #666; font-weight: normal; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.08em; border-bottom: 1px solid #333; padding: 3px 8px; text-align: left; }
+.arte-table td { color: #ddd; padding: 3px 8px; border-bottom: 1px solid #1a1a1a; }
+.arte-table tr:hover td { background-color: #1a1a2e; cursor: pointer; }
+.snapshot-loading { color: #444; font-size: 0.85rem; padding: 20px 0; }
+.snapshot-error { color: #dc3545; font-size: 0.82rem; padding: 10px 0; }
+.chart-canvas { background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 4px; display: block; width: 100%; }
+#gtms-clock { font-size: 0.95rem; letter-spacing: 0.06em; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+.mem-bar { background: #222; border-radius: 3px; height: 14px; overflow: hidden; border: 1px solid #333; }
+.mem-bar .mem-used { background: #00cc66; height: 100%; }
+.mem-bar .mem-committed { background: #fd7e14; height: 100%; position: relative; top: -14px; opacity: 0.5; }
+.op-graph-card { border: 1px solid #2a2a2a; border-radius: 4px; padding: 6px 8px; margin-bottom: 8px; background: #111; }
+.chart-legend span { font-size: 0.7rem; margin-right: 10px; }
+.chart-legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }

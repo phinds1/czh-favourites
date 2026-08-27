@@ -1,0 +1,63 @@
+schedules:
+  - cron: '0 1 * * *'
+    displayName: Daily 1:00am EST dependency submission
+    batch: true
+    branches:
+      include:
+        - develop
+    always: true
+
+trigger: none
+
+pr: none
+
+variables:
+  - group: ado-group
+  - group: github-token
+
+resources:
+  repositories:
+    - repository: azureTemplate
+      type: github
+      name: igt-LotteryServiceDelivery/azure-github-templates
+      endpoint: igt-LotteryServiceDelivery
+      ref: refs/tags/0.0.11
+
+jobs:
+  - job: Dependencies
+    timeoutInMinutes: 120
+    pool: $(siteCode) Non-Production Pool
+    workspace:
+      clean: all
+
+    steps:
+
+      - checkout: self
+        fetchDepth: 0
+      - checkout: azureTemplate
+        path: azureTemplate
+        fetchDepth: 0
+        clean: true
+
+      - task: Bash@3
+        displayName: 'Setting repository name'
+        inputs:
+          targetType: 'inline'
+          script: |
+            SUBSTRING=$(echo $(Build.Repository.Name)| cut -d'/' -f 2)
+            echo $SUBSTRING
+            echo "##vso[task.setvariable variable=repoName]$SUBSTRING"
+
+      - task: DownloadSecureFile@1
+        name: mvnSettings
+        displayName: 'Download boa-settings.xml'
+        inputs:
+          secureFile: 'boa-settings.xml'
+
+      - template: /.azuredevops/templates/maven/setup-maven.yaml@azureTemplate
+
+      - template: /.azuredevops/templates/maven/dependency-submission.yaml@azureTemplate
+        parameters:
+          settingsFile: '$(mvnSettings.secureFilePath)'
+          ghRepository: 'igt-LotteryServiceDelivery/$(repoName)'
+          projectDir: './$(repoName)'

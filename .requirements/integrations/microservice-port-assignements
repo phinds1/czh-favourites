@@ -1,0 +1,16 @@
+In order to ensure we can co-host for production deployments and test setups we need to enaure that each microservice we create has unique ports
+
+| microservice | front end port | management port | test port range |
+|--------------|----------------|-----------------|-----------------|
+| nio-tni      | 9080           | 9081            |                 |
+| gis wagering | 9180           | 9181            |                 |
+| czh-money    | 9280           | 9281            |                 |
+| czhgroup     | 9380           | 9381            | 9385-9379       |
+| czh-favorites| 9480           | 9481            |                 |
+| czh-history  | 9580           | 9581            |                 |
+| dgsubs       | 9680           | 9681            |                 |
+| gateway      | 9780           | 9781            |                 |
+| paymock      | 9880           | 9881            |                 |
+| features     | 9980           | 9981            |                 |
+| legacy gis   | 8180           |                 |                 |
+| leg gateway  | 8280           |                 |                 |

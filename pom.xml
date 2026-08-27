@@ -1,0 +1,278 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<groupId>cz.bsl.gis</groupId>
+	<version>0.0.1-SNAPSHOT</version>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>czh-favourites</artifactId>
+	<packaging>pom</packaging>
+
+	<properties>
+		<java.version>25</java.version>
+		<maven.compiler.release>${java.version}</maven.compiler.release>
+		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ssZ</maven.build.timestamp.format>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.site.skip>true</maven.site.skip>
+		<maven.source.skip>false</maven.source.skip>
+		<maven.javadoc.skip>true</maven.javadoc.skip>
+
+		<!-- maven plugin versions (max on 2026-01027) -->
+		<maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
+		<maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+		<maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+		<maven-dependency-plugin.version>3.7.0</maven-dependency-plugin.version>
+		<maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
+		<maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
+		<maven-install-plugin.version>3.1.4</maven-install-plugin.version>
+		<maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+		<maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+		<maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
+		<maven-site-plugin.version>3.21.0</maven-site-plugin.version>
+		<maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+		<maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
+		<rpm-plugin.version>2.3.0</rpm-plugin.version>
+		<git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
+		<exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
+		<build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
+		<jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+		<sonar-maven-plugin.version>5.5.0.6356</sonar-maven-plugin.version>
+
+		<!-- library versions -->
+		<spring-boot.version>4.0.2</spring-boot.version>
+		<spring-framework.version>7.0.3</spring-framework.version>
+
+		<db2jcc4.version>4.13.127</db2jcc4.version>
+		<hamcrest.version>3.0</hamcrest.version>
+		<jamcrest.version>0.1.1</jamcrest.version>
+		<hikaricp.version>7.0.2</hikaricp.version>
+		<hsqldb.version>2.3.6</hsqldb.version>
+		<logback.version>1.5.25</logback.version>
+		<slf4j.version>2.0.17</slf4j.version>
+		<commons-lang.version>3.19.0</commons-lang.version>
+		<commons-io.version>2.16.1</commons-io.version>
+		<commons-cli.version>1.6.0</commons-cli.version>
+		<jakarta-annotation.version>3.0.0</jakarta-annotation.version>
+
+	</properties>
+
+	<modules>
+		<module>czh-favorites-api</module>
+		<module>czh-favorites-app</module>
+		<module>czh-favorites-db</module>
+		<module>czh-favorites-app-rpm</module>
+		<module>czh-favorites-db-rpm</module>
+	</modules>
+
+	<dependencies>
+		<!-- inherited by all child modules -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Spring Boot BOM — manages all Spring, Jackson, Logback, Mockito, JUnit 5 versions -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- versions not covered by Boot BOM -->
+			<dependency>
+				<groupId>com.zaxxer</groupId>
+				<artifactId>HikariCP</artifactId>
+				<version>${hikaricp.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.annotation</groupId>
+				<artifactId>jakarta.annotation-api</artifactId>
+				<version>${jakarta-annotation.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.ibm.db2</groupId>
+				<artifactId>db2jcc4</artifactId>
+				<version>${db2jcc4.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-cli</groupId>
+				<artifactId>commons-cli</artifactId>
+				<version>${commons-cli.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang.version}</version>
+			</dependency>
+		<dependency>
+			<groupId>io.github.teknopaul</groupId>
+			<artifactId>jamcrest</artifactId>
+			<version>${jamcrest.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Override GraalVM version to what is available in local repo (jamcrest transitive dep) -->
+		<dependency>
+			<groupId>org.graalvm.polyglot</groupId>
+			<artifactId>polyglot</artifactId>
+			<version>24.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.polyglot</groupId>
+			<artifactId>js-community</artifactId>
+			<version>24.0.0</version>
+			<type>pom</type>
+		</dependency>
+			<dependency>
+				<groupId>org.hsqldb</groupId>
+				<artifactId>hsqldb</artifactId>
+				<version>${hsqldb.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven-compiler-plugin.version}</version>
+					<configuration>
+						<release>${java.version}</release>
+						<compilerArgs>
+							<arg>-parameters</arg>
+						</compilerArgs>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${maven-surefire-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>${maven-assembly-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>${maven-dependency-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>${maven-resources-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>${spring-boot.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco-maven-plugin.version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<!--
+		    github-ci: activated on GitHub Actions via -P github-ci.
+		    Replaces the IBM DB2 driver (not on Maven Central) with an H2 in-memory driver
+		    so all tests can run without the private nexus repository.
+		    Also disables the private nexus repository to avoid network failures.
+		-->
+		<profile>
+			<id>github-ci</id>
+			<properties>
+				<!-- Signal to code that we are in CI without db2 -->
+				<db2.driver.skip>true</db2.driver.skip>
+			</properties>
+			<dependencies>
+				<!-- Substitute H2 for IBM DB2 in CI (HSQLDB used for unit tests already) -->
+				<dependency>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+					<version>2.4.240</version>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>czh-yum-snapshot</id>
+			<url>https://nexuspro.dcs.lotteryservices.net/repository/czh-yum-snapshot</url>
+		</snapshotRepository>
+		<repository>
+			<id>czh-release</id>
+			<url>http://xxmaven/content/repositories/czh-release</url>
+		</repository>
+	</distributionManagement>
+
+	<repositories>
+		<repository>
+			<id>central</id>
+			<url>https://repo1.maven.org/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>nexus</id>
+			<name>Public Repositories</name>
+			<url>https://xxmaven/content/groups/public</url>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>central</id>
+			<url>https://repo1.maven.org/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>nexus</id>
+			<url>https://xxmaven/content/groups/public</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+</project>

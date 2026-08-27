@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>cz.bsl.gis</groupId>
+        <artifactId>czh-favourites</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>czh-favorites-db-rpm</artifactId>
+    <packaging>${maven.packaging.type}</packaging>
+    <description>czh-favorites DB delta RPM — db2delta SQL files + run-delta.sh runner (no Liquibase)</description>
+
+    <properties>
+        <maven.packaging.type>pom</maven.packaging.type>
+        <install.root>/opt/czh-favorites-db</install.root>
+        <install.user>root</install.user>
+        <install.group>root</install.group>
+        <packaging.group>Lottery/Database</packaging.group>
+        <jacoco-maven-plugin.skip>true</jacoco-maven-plugin.skip>
+        <rpm.skipSigning>true</rpm.skipSigning>
+        <maven.source.skip>true</maven.source.skip>
+    </properties>
+
+    <dependencies>
+        <!-- Reactor ordering only: the db-rpm builds after the czh-favorites-db delta module. -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>czh-favorites-db</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>generate db rpm</id>
+            <activation>
+                <property>
+                    <name>rpm</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <maven.packaging.type>rpm</maven.packaging.type>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>de.dentrassi.maven</groupId>
+                        <artifactId>rpm</artifactId>
+                        <version>${rpm-plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <group>${packaging.group}</group>
+                            <packager>IGT</packager>
+
+                            <rulesets>
+                                <ruleset>
+                                    <id>main</id>
+                                    <rules>
+                                        <rule>
+                                            <when>
+                                                <type>directory</type>
+                                            </when>
+                                            <mode>0755</mode>
+                                        </rule>
+                                        <rule>
+                                            <when>
+                                                <type>file</type>
+                                                <prefix>${install.root}</prefix>
+                                            </when>
+                                            <user>${install.user}</user>
+                                            <group>${install.group}</group>
+                                        </rule>
+                                        <rule>
+                                            <when>
+                                                <type>file</type>
+                                                <suffix>sh</suffix>
+                                            </when>
+                                            <mode>0755</mode>
+                                        </rule>
+                                        <rule>
+                                            <when>
+                                                <type>file</type>
+                                                <suffix>sql</suffix>
+                                            </when>
+                                            <mode>0644</mode>
+                                        </rule>
+                                    </rules>
+                                </ruleset>
+                            </rulesets>
+
+                            <entries>
+                                <entry>
+                                    <name>${install.root}</name>
+                                    <directory>true</directory>
+                                    <ruleset>main</ruleset>
+                                </entry>
+                                <entry>
+                                    <name>${install.root}/bin</name>
+                                    <directory>true</directory>
+                                    <ruleset>main</ruleset>
+                                </entry>
+                                <entry>
+                                    <name>${install.root}/conf</name>
+                                    <directory>true</directory>
+                                    <ruleset>main</ruleset>
+                                </entry>
+                                <entry>
+                                    <name>${install.root}/structure</name>
+                                    <directory>true</directory>
+                                    <ruleset>main</ruleset>
+                                </entry>
+
+                                <!-- db2delta SQL files, collected from the czh-favorites-db module -->
+                                <entry>
+                                    <name>${install.root}/structure</name>
+                                    <collect>
+                                        <from>${basedir}/../czh-favorites-db/src/main/delta</from>
+                                        <includes>*.sql</includes>
+                                    </collect>
+                                    <ruleset>main</ruleset>
+                                </entry>
+
+                                <!-- run-delta.sh runner -->
+                                <entry>
+                                    <name>${install.root}/bin</name>
+                                    <collect>
+                                        <from>${basedir}/src/main/bin</from>
+                                        <includes>*.sh</includes>
+                                    </collect>
+                                    <ruleset>main</ruleset>
+                                </entry>
+
+                                <!-- optional config (e.g. database.env) -->
+                                <entry>
+                                    <name>${install.root}/conf</name>
+                                    <collect>
+                                        <from>${basedir}/src/main/conf</from>
+                                        <includes>*.env,*.xml,*.properties</includes>
+                                    </collect>
+                                    <ruleset>main</ruleset>
+                                </entry>
+                            </entries>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-install-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

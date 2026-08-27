@@ -1,0 +1,28 @@
+{
+  "allowTools": [
+    "Bash(cd)",
+    "Bash(ls)",
+    "Bash(cat)",
+    "Bash(grep)",
+    "Bash(head)",
+    "Bash(tail)",
+    "Bash(find)",
+    "Bash(xargs)",
+    "Bash(sed)",
+    "Bash(safesed)",
+    "Bash(awk)",
+    "Bash(diff)",
+    "Bash(cp)",
+    "Bash(mv)",
+    "Bash(mkdir)",
+    "Bash(rm)",
+    "Bash(git)",
+    "Bash(mvn)",
+    "Bash(mvn.sh)",
+    "Bash(/opt/jdk-25/bin/java)",
+    "Bash(/opt/maven/bin/mvn)",
+    "Read",
+    "Edit",
+    "Write"
+  ]
+}

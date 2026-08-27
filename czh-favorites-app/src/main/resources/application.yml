@@ -1,0 +1,52 @@
+server:
+  port: 9290
+
+spring:
+  application:
+    name: czh-favourites
+  jackson:
+    default-property-inclusion: non_null
+    datatype:
+      datetime:
+        write-dates-as-timestamps: false
+  datasource:
+    url: jdbc:db2://localhost:50000/PDDB
+    driver-class-name: com.ibm.db2.jcc.DB2Driver
+    username: gtkinst1
+    password: gtkinst1
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: FavouritesHikariPool
+
+management:
+  server:
+    port: 9291
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    cz.bsl.favourites: DEBUG
+
+favourites:
+  min-group-index: 1
+  max-group-index: 10
+  default-group-name: ""
+  max-favorites: 50
+  max-favorite-boards: 200
+  keno-reserved-group-index: 1
+  return-empty-groups: false

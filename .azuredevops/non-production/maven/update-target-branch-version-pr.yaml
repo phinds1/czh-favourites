@@ -1,0 +1,93 @@
+trigger:
+  batch: false
+  branches:
+    include:
+      - 'action@release#*'
+      - 'action@prerelease#*'
+  tags:
+    exclude:
+      - '*'
+
+pr: none
+
+resources:
+  repositories:
+    - repository: azureTemplate
+      type: github
+      name: igt-LotteryServiceDelivery/azure-github-templates
+      endpoint: igt-LotteryServiceDelivery
+      ref: refs/tags/0.0.11
+
+variables:
+  - group: ado-group
+  - group: github-token
+  - name: dependencies_list
+    value: ""
+
+jobs:
+  - job: UpdateReleaseTargetBranchVersion
+    displayName: 'Update Release Target Branch Version'
+    pool: $(siteCode) Non-Production Pool
+    workspace:
+      clean: all
+
+    steps:
+      - checkout: self
+        path: s
+        fetchDepth: 0
+        clean: true
+
+      - checkout: azureTemplate
+        path: azureTemplate
+        fetchDepth: 0
+        clean: true
+
+      - task: DownloadSecureFile@1
+        name: mvnSettings
+        displayName: 'Download czh-favorites-settings.xml'
+        inputs:
+          secureFile: 'czh-favorites-settings.xml'
+
+      - script: |
+
+          echo "BUILD_REPOSITORY_NAME: ${BUILD_REPOSITORY_NAME}"
+          echo "BUILD_SOURCEBRANCHNAME: ${BUILD_SOURCEBRANCHNAME}"
+          TAG_NAME=$(echo ${BUILD_SOURCEBRANCHNAME}| cut -d'#' -f 2)
+          echo "RELEASE_NAME: ${TAG_NAME}"
+          URL="https://api.github.com/repos/${BUILD_REPOSITORY_NAME}/releases/tags/${TAG_NAME}"
+          echo "URL: ${URL}"
+
+          RESPONSE=$(curl -SL \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            "${URL}")
+
+          TARGET_COMMITISH=$(echo "${RESPONSE}" | jq -r '.target_commitish')
+          PRERELEASE=$(echo "${RESPONSE}" | jq -r '.prerelease')
+          echo "TARGET_COMMITISH: ${TARGET_COMMITISH}"
+          echo "PRERELEASE: ${PRERELEASE}"
+
+          echo "##vso[task.setvariable variable=TAG_NAME]$TAG_NAME"
+          echo "##vso[task.setvariable variable=TARGET_COMMITISH]$TARGET_COMMITISH"
+          echo "##vso[task.setvariable variable=PRERELEASE]$PRERELEASE"
+
+        displayName: 'Fetch Release parameters'
+        env:
+          GITHUB_TOKEN: $(AZURE_PIPELINES)
+
+      - script: |
+          $(Pipeline.Workspace)/azureTemplate/.azuredevops/scripts/update-target-branch-version-pr-1.sh $(TAG_NAME) $(PRERELEASE) $(TARGET_COMMITISH) '$(mvnSettings.secureFilePath)'
+        env:
+          GITHUB_TOKEN: $(AZURE_PIPELINES)
+        displayName: '1 - Update release target branch version'
+
+      - script: |
+          $(Pipeline.Workspace)/azureTemplate/.azuredevops/scripts/maven-update-dependencies-version.sh '$(dependencies_list)' true '$(mvnSettings.secureFilePath)'
+        displayName: 'Update dependencies to snapshot'
+
+      - script: |
+          $(Pipeline.Workspace)/azureTemplate/.azuredevops/scripts/update-target-branch-version-pr-2.sh $(TAG_NAME) $(PRERELEASE) $(TARGET_COMMITISH)
+        env:
+          GITHUB_TOKEN: $(AZURE_PIPELINES)
+        displayName: '2 - Update release target branch version'

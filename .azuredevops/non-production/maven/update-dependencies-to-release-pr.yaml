@@ -1,0 +1,65 @@
+trigger:
+  batch: false
+  branches:
+    include:
+      - 'action@prepare-release#*'
+  tags:
+    exclude:
+      - '*'
+
+pr: none
+
+resources:
+  repositories:
+    - repository: azureTemplate
+      type: github
+      name: igt-LotteryServiceDelivery/azure-github-templates
+      endpoint: igt-LotteryServiceDelivery
+      ref: refs/tags/0.0.11
+
+variables:
+  - group: ado-group
+  - group: github-token
+  - name: dependencies_list
+    value: "czh_favorites.version"
+
+jobs:
+  - job: UpdateDependenciesToReleaseVersion
+    timeoutInMinutes: 120
+    pool: $(siteCode) Non-Production Pool
+    workspace:
+      clean: all
+
+    displayName: 'Update Dependencies to Release Version'
+    steps:
+      - checkout: self
+        path: s
+        fetchDepth: 0
+        clean: true
+        persistCredentials: true
+
+      - checkout: azureTemplate
+        path: azureTemplate
+        fetchDepth: 0
+        clean: true
+
+      - task: DownloadSecureFile@1
+        name: mvnSettings
+        displayName: 'Download czh-favorites-settings.xml'
+        inputs:
+          secureFile: 'czh-favorites-settings.xml'
+
+      - task: Bash@3
+        displayName: 'Read Source Branch Name'
+        inputs:
+          targetType: 'filePath'
+          filePath: '$(Pipeline.Workspace)/azureTemplate/.azuredevops/scripts/read-branch-name.sh'
+          arguments: '"$(Build.SourceBranch)"'
+
+      - script: |
+          $(Pipeline.Workspace)/azureTemplate/.azuredevops/scripts/update-dependencies-version-to-release-pr.sh '$(dependencies_list)' $(SOURCE_BRANCH) '$(mvnSettings.secureFilePath)'
+        env:
+          GITHUB_TOKEN: $(AZURE_PIPELINES)
+        displayName: 'Update dependencies to release version'
+
+      - template: /.azuredevops/templates/maven/delete-source-branch.yaml@azureTemplate

@@ -1,0 +1,96 @@
+trigger:
+  batch: false
+  branches:
+    include:
+      - 'action@release#*'
+      - 'action@prerelease#*'
+  tags:
+    exclude:
+      - '*'
+
+pr: none
+
+variables:
+  - group: ado-group
+  - group: nexus-pro
+  - group: github-token
+  - group: msteams
+
+resources:
+  repositories:
+    - repository: azureTemplate
+      type: github
+      name: igt-LotteryServiceDelivery/azure-github-templates
+      endpoint: igt-LotteryServiceDelivery
+      ref: refs/tags/0.0.11
+
+stages:
+
+  - stage: BuildRelease
+
+    jobs:
+
+      - job: BuildRelease
+        timeoutInMinutes: 120
+        pool: $(siteCode) Non-Production Pool 4cpu
+        workspace:
+          clean: all
+
+        steps:
+
+          - checkout: self
+            path: s
+            fetchDepth: 1
+            clean: true
+            persistCredentials: true
+          - checkout: azureTemplate
+            path: azureTemplate
+            fetchDepth: 0
+            clean: true
+
+          - task: Bash@3
+            displayName: 'Read Version From Branch'
+            inputs:
+              targetType: 'filePath'
+              filePath: '$(Pipeline.Workspace)/azureTemplate/.azuredevops/scripts/read-version-from-branch.sh'
+              arguments: '"$(Build.SourceBranch)"'
+
+          - task: DownloadSecureFile@1
+            name: mvnSettings
+            displayName: 'Download czh-favorites-settings.xml'
+            inputs:
+              secureFile: 'czh-favorites-settings.xml'
+
+          - task: Bash@3
+            displayName: 'Set Maven Version'
+            inputs:
+              targetType: 'filePath'
+              filePath: '$(Pipeline.Workspace)/azureTemplate/.azuredevops/scripts/maven-set-version.sh'
+              arguments: '"$(RELEASE_VERSION)" "$(Build.SourceBranch)" "false" "$(mvnSettings.secureFilePath)"'
+
+          - template: /.azuredevops/templates/maven/run-maven.yaml@azureTemplate
+            parameters:
+              displayName: 'Maven deploy and build rpms'
+              goals: 'clean deploy -Dmaven.test.skip=true'
+              mvnOpts: '-s $(mvnSettings.secureFilePath) -Dmaven.repo.local=.m2 -Drpm=true'
+              jdkVersionOption: '25'
+
+          - task: Bash@3
+            displayName: 'Find RPM folders'
+            inputs:
+              targetType: 'filePath'
+              filePath: '$(Pipeline.Workspace)/azureTemplate/.azuredevops/scripts/find-rpm-folders.sh'
+
+          - task: Bash@3
+            displayName: 'Upload RPMs to Nexus'
+            inputs:
+              targetType: 'filePath'
+              filePath: '$(Pipeline.Workspace)/azureTemplate/.azuredevops/scripts/find-rpms-and-upload.sh'
+              arguments: '"$(NEXUS_PRO_REPO_BASE_URL)" "$(NEXUS_PRO_CZH_REPO_NAME)" "$(NEXUS_PRO_USER)" "$(NEXUS_PRO_PASSWORD)" "true"'
+            condition: eq(variables.rpm_folders, 'true')
+
+          - template: /.azuredevops/templates/maven/delete-source-branch.yaml@azureTemplate
+
+          - template: .azuredevops/templates/sent-msteams-notification.yaml@azureTemplate
+            parameters:
+              MSTEAMS_WEBHOOK: $(TEAMS_CZH_FAVORITES_RELEASE)

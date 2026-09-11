@@ -8,11 +8,11 @@
 ## Overview
 
 Create the two deployment RPM modules (`czh-favorites-app-rpm`, `czh-favorites-db-rpm`),
-`systemd` unit, `start/stop/status` shell scripts, and GitHub Actions CI YAML.
-This is a direct port of the czh-money deployment pattern with `czh-favorites` substituted
-for `czh-money` and port 9290/9291 for the service.
+`systemd` unit, `start/stop/status` shell scripts, GitHub Actions CI YAML, and Azure DevOps
+pipeline YAMLs (6 pipelines matching the czh-money pattern).
 
-**Reference:** `/java/czh/czh-money/money-app-rpm/` and `/java/czh/czh-money/czh-money-db-rpm/`
+**Reference:** `/java/czh/czh-money/money-app-rpm/`, `/java/czh/czh-money/czh-money-db-rpm/`,
+`/java/czh/czh-money/.azuredevops/non-production/maven/`
 
 ---
 
@@ -38,18 +38,18 @@ the fat-jar into an RPM installable to `/opt/czh-favorites/`.
 
 Mirror `money-app-rpm/pom.xml` with these substitutions:
 
-| czh-money value         | czh-favourites value                 |
-|-------------------------|--------------------------------------|
-| `czh-money`             | `czh-favourites` (parent artifactId) |
-| `money-app`             | `czh-favorites-app`                  |
-| `money-app-rpm`         | `czh-favorites-app-rpm`              |
-| `/opt/czh-money`        | `/opt/czh-favorites`                 |
-| `czh-money-app.jar`     | `czh-favorites-app.jar`              |
-| `/var/log/czh-money/`   | `/var/log/czh-favorites/`            |
-| `/var/run/czh-money/`   | `/var/run/czh-favorites/`            |
-| `/etc/czh-money`        | `/etc/czh-favorites`                 |
-| `czh-money.service`     | `czh-favorites.service`              |
-| start-service.sh symlink `start` | keep same pattern          |
+| czh-money value                  | czh-favourites value                 |
+|----------------------------------|--------------------------------------|
+| `czh-money`                      | `czh-favourites` (parent artifactId) |
+| `money-app`                      | `czh-favorites-app`                  |
+| `money-app-rpm`                  | `czh-favorites-app-rpm`              |
+| `/opt/czh-money`                 | `/opt/czh-favorites`                 |
+| `czh-money-app.jar`              | `czh-favorites-app.jar`              |
+| `/var/log/czh-money/`            | `/var/log/czh-favorites/`            |
+| `/var/run/czh-money/`            | `/var/run/czh-favorites/`            |
+| `/etc/czh-money`                 | `/etc/czh-favorites`                 |
+| `czh-money.service`              | `czh-favorites.service`              |
+| start-service.sh symlink `start` | keep same pattern                    |
 
 The `<dependency>` on `czh-favorites-app` must use `<classifier>exec</classifier>` (the Spring Boot
 repackaged fat jar) — confirm `czh-favorites-app/pom.xml` uses `spring-boot-maven-plugin` with the
@@ -127,12 +127,12 @@ into an RPM installable to `/opt/czh-favorites-db/`.
 
 Mirror `czh-money-db-rpm/pom.xml` with substitutions:
 
-| czh-money value            | czh-favourites value              |
-|----------------------------|-----------------------------------|
-| `czh-money`                | `czh-favourites`                  |
-| `czh-money-db`             | `czh-favorites-db`                |
-| `czh-money-db-rpm`         | `czh-favorites-db-rpm`            |
-| `/opt/czh-money-db`        | `/opt/czh-favorites-db`           |
+| czh-money value                  | czh-favourites value                 |
+|----------------------------------|--------------------------------------|
+| `czh-money`                      | `czh-favourites`                     |
+| `czh-money-db`                   | `czh-favorites-db`                   |
+| `czh-money-db-rpm`               | `czh-favorites-db-rpm`               |
+| `/opt/czh-money-db`              | `/opt/czh-favorites-db`              |
 | `../czh-money-db/src/main/delta` | `../czh-favorites-db/src/main/delta` |
 
 The `<dependency>` on `czh-favorites-db` forces reactor ordering.
@@ -226,11 +226,61 @@ Open `/java/czh/czh-favourites/pom.xml`. If no `github-ci` profile exists, add o
 
 ---
 
-## Phase 4 — Sign-off
+## Phase 4 — Azure DevOps CI
+
+### Goal
+Six Azure DevOps pipeline YAML files under `.azuredevops/non-production/maven/` mirroring
+the czh-money pattern with all `czh-money` references replaced by `czh-favorites`.
+
+### Reference files
+- `/java/czh/czh-money/.azuredevops/non-production/maven/maven-build-develop-branch.yaml`
+- `/java/czh/czh-money/.azuredevops/non-production/maven/maven-build-pull-request.yaml`
+- `/java/czh/czh-money/.azuredevops/non-production/maven/maven-build-release-action-branch.yaml`
+- `/java/czh/czh-money/.azuredevops/non-production/maven/maven-dependency-submission.yaml`
+- `/java/czh/czh-money/.azuredevops/non-production/maven/update-dependencies-to-release-pr.yaml`
+- `/java/czh/czh-money/.azuredevops/non-production/maven/update-target-branch-version-pr.yaml`
+
+### Substitution table
+
+| czh-money value            | czh-favorites value            |
+|----------------------------|--------------------------------|
+| `czh-money-settings.xml`   | `czh-favorites-settings.xml`   |
+| `czh_money.version`        | `czh_favorites.version`        |
+| `TEAMS_CZH_MONEY_RELEASE`  | `TEAMS_CZH_FAVORITES_RELEASE`  |
+| `TEAMS_CZH_MONEY_SNAPSHOT` | `TEAMS_CZH_FAVORITES_SNAPSHOT` |
+
+All other content (pool names, template references, Nexus variables, azure-github-templates
+version `0.0.11`, Sonar URL) copies verbatim — these are organisation-wide settings.
 
 ### Tasks
 
-#### 4.1 — Verify RPM build locally
+#### 4.1 — Create directory structure
+
+```
+.azuredevops/non-production/maven/
+```
+
+#### 4.2 — Create all 6 pipeline files
+
+Port each file applying the substitution table above.
+
+```sh
+~/bin/geany-progress done 4 \
+  -r .azuredevops/non-production/maven/maven-build-develop-branch.yaml \
+  -r .azuredevops/non-production/maven/maven-build-pull-request.yaml \
+  -r .azuredevops/non-production/maven/maven-build-release-action-branch.yaml \
+  -r .azuredevops/non-production/maven/maven-dependency-submission.yaml \
+  -r .azuredevops/non-production/maven/update-dependencies-to-release-pr.yaml \
+  -r .azuredevops/non-production/maven/update-target-branch-version-pr.yaml
+```
+
+---
+
+## Phase 5 — Sign-off
+
+### Tasks
+
+#### 5.1 — Verify RPM build locally
 
 ```bash
 ./mvn.sh install -Drpm=true -pl czh-favorites-app-rpm
@@ -239,15 +289,15 @@ Open `/java/czh/czh-favourites/pom.xml`. If no `github-ci` profile exists, add o
 
 Check that `czh-favorites-app-rpm/target/*.rpm` and `czh-favorites-db-rpm/target/*.rpm` exist.
 
-#### 4.2 — Verify `./mvn.sh install` (without `-Drpm=true`) still passes all tests
+#### 5.2 — Verify `./mvn.sh install` (without `-Drpm=true`) still passes all tests
 
 The default `maven.packaging.type=pom` must skip RPM packaging cleanly.
 
-#### 4.3 — Routing map
+#### 5.3 — Routing map
 
 No new sanenamed Java components — skip routing map update for SP9.
 
 ```sh
-~/bin/geany-progress done 4 \
+~/bin/geany-progress done 5 \
   -w "norun active — run ./mvn.sh install -Drpm=true to validate RPM build"
 ```

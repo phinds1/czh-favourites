@@ -1,0 +1,85 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - develop
+  paths:
+    exclude:
+      - README.md
+      - RELEASE_PROCESS.md
+      - DEPLOYMENT.md
+      - doc/*
+  tags:
+    exclude:
+      - '*'
+
+pr: none
+
+variables:
+  - group: ado-group
+  - group: github-token
+  - group: sonar-token
+  - group: nexus-pro
+  - group: msteams
+
+resources:
+  repositories:
+    - repository: azureTemplate
+      type: github
+      name: igt-LotteryServiceDelivery/azure-github-templates
+      endpoint: igt-LotteryServiceDelivery
+      ref: refs/tags/0.0.11
+
+jobs:
+  - job: Build
+    timeoutInMinutes: 120
+    pool: $(siteCode) Non-Production Pool 4cpu
+    workspace:
+      clean: all
+
+    steps:
+      - checkout: self
+        path: s
+      - checkout: azureTemplate
+        path: azureTemplate
+        fetchDepth: 0
+        clean: true
+
+      - task: DownloadSecureFile@1
+        name: mvnSettings
+        displayName: 'Download czh-favorites-settings.xml'
+        inputs:
+          secureFile: 'czh-favorites-settings.xml'
+
+      - template: /.azuredevops/templates/maven/run-maven.yaml@azureTemplate
+        parameters:
+          displayName: 'Maven install and test and build rpms'
+          goals: 'clean install'
+          mvnOpts: '-s $(mvnSettings.secureFilePath) -Dmaven.repo.local=.m2 -Drpm=true'
+          jdkVersionOption: '25'
+
+      - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/develop') }}:
+          - template: /.azuredevops/templates/maven/run-maven.yaml@azureTemplate
+            parameters:
+              displayName: 'Sonar scanner'
+              goals: 'sonar:sonar "-Dsonar.login=$(SONAR_TOKEN)" "-Dsonar.host.url=https://sonarqube-eastus.d1.ccs.lotteryservices.net" "-Dsonar.scm.provider=git"'
+              mvnOpts: '-B -s $(mvnSettings.secureFilePath)'
+              jdkVersionOption: '25'
+
+      - task: Bash@3
+        displayName: 'Find RPM folders'
+        inputs:
+          targetType: 'filePath'
+          filePath: '$(Pipeline.Workspace)/azureTemplate/.azuredevops/scripts/find-rpm-folders.sh'
+
+      - task: Bash@3
+        displayName: 'Upload RPMs to Nexus'
+        inputs:
+          targetType: 'filePath'
+          filePath: '$(Pipeline.Workspace)/azureTemplate/.azuredevops/scripts/find-rpms-and-upload.sh'
+          arguments: '"$(NEXUS_PRO_REPO_BASE_URL)" "$(NEXUS_PRO_CZH_REPO_NAME)" "$(NEXUS_PRO_USER)" "$(NEXUS_PRO_PASSWORD)" "false"'
+        condition: eq(variables.rpm_folders, 'true')
+
+      - template: .azuredevops/templates/sent-msteams-notification.yaml@azureTemplate
+        parameters:
+          MSTEAMS_WEBHOOK: $(TEAMS_CZH_FAVORITES_SNAPSHOT)

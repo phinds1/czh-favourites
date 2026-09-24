@@ -30,7 +30,7 @@
 		<maven-site-plugin.version>3.21.0</maven-site-plugin.version>
 		<maven-source-plugin.version>3.4.0</maven-source-plugin.version>
 		<maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
-		<rpm-plugin.version>2.3.0</rpm-plugin.version>
+		<rpm-plugin.version>1.13.0</rpm-plugin.version>
 		<git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
 		<exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
 		<build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>

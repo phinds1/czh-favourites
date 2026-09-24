@@ -122,6 +122,13 @@
     </build>
 
     <profiles>
+        <!-- Stub of the root POM's github-ci profile. -P github-ci must activate a
+             profile in THIS POM to deactivate the activeByDefault db2 profile below
+             (Maven deactivates activeByDefault only within the same POM). Removing
+             this stub makes CI pull db2jcc4 from the private nexus and fail off-network. -->
+        <profile>
+            <id>github-ci</id>
+        </profile>
         <profile>
             <id>db2</id>
             <activation>

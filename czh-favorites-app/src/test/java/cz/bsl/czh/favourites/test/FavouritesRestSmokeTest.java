@@ -61,10 +61,16 @@ class FavouritesRestSmokeTest extends AbstractRestTest {
 
     @Test
     void guiIndex_returns200WithCorrectTitle() {
-        ResponseEntity<String> response = restTemplate.getForEntity("/gui/index.html", String.class);
+        // The GUI is served on the management context (port 9291 / GuiResourceConfig), not the app
+        // context — fetch it via the management RestTemplate. No X-Vision-Base header → the
+        // vision-base meta stays empty (direct-on-port pass-through).
+        ResponseEntity<String> response = managementRestTemplate.getForEntity("/gui/index.html", String.class);
         assertEquals(200, response.getStatusCode().value());
         Assertions.assertTrue(
                 response.getBody() != null && response.getBody().contains("czh-favourites Vision"),
                 "GUI index.html must contain the application title");
+        Assertions.assertTrue(
+                response.getBody().contains("<meta name=\"vision-base\" content=\"\">"),
+                "GUI index.html must carry the empty vision-base meta placeholder (no header): " + response.getBody());
     }
 }

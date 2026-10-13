@@ -96,6 +96,12 @@
             <version>20180130</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- czh-mscommon shared library (pid file) -->
+        <dependency>
+            <groupId>cz.bsl.gis</groupId>
+            <artifactId>czh-mscommon-lib</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

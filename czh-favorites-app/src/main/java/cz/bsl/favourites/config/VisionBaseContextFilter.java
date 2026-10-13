@@ -21,6 +21,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
+// TODO bit of a hack, we could have used JSP for HTML rendering
+
 /**
  * Makes the Vision GUI context-root aware when served behind an nginx reverse proxy. nginx routes
  * by the first URL segment (e.g. {@code /favourites-mgmt/...}) and tells the backend which context the
@@ -61,8 +63,7 @@ public class VisionBaseContextFilter extends OncePerRequestFilter {
     private static final String INDEX_CLASSPATH = "/gui/index.html";
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String base = normalizeBase(request.getHeader(VISION_BASE_HEADER));
         if (base.isEmpty()) {
             filterChain.doFilter(request, response);
@@ -129,8 +130,7 @@ public class VisionBaseContextFilter extends OncePerRequestFilter {
      * (they do not match {@code ="/gui/}).
      */
     static String rewrite(String html, String base) {
-        String filled = html.replace(META_EMPTY,
-                "<meta name=\"vision-base\" content=\"" + base + "\">");
+        String filled = html.replace(META_EMPTY, "<meta name=\"vision-base\" content=\"" + base + "\">");
         return filled.replace("=\"/gui/", "=\"" + base + "/gui/");
     }
 

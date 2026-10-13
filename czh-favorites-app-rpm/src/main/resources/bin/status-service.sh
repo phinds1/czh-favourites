@@ -1,8 +1,7 @@
 #!/bin/bash
 
-app="czh-favorites"
 
-pid_file=/var/run/czh-favorites/$app.pid
+pid_file=/var/run/czh/czh-favorites.pid
 
 if [[ -f $pid_file ]]
 then
@@ -11,10 +10,10 @@ then
       echo "running"
       if [[ "$1" == "-v" || "$1" == "--verbose" ]]
       then
-        tail -100 /var/log/$app/spring.log
+        tail -100 /var/log/favorites/spring.log
       elif [[ "$1" == "-f" || "$1" == "--follow" ]]
       then
-        tail -f /var/log/$app/spring.log
+        tail -f /var/log/favorites/spring.log
       fi
   else
       echo "process is not running ($pid)"

@@ -1,6 +1,7 @@
 package cz.bsl.favourites;
 
 import cz.bsl.favourites.config.FavouritesProperties;
+import cz.bsl.mscommon.pid.PidFile;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -10,6 +11,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 public class FavouritesApplication {
 
     public static void main(String[] args) {
+        PidFile.createPid("/var/run/czh", "favourites.pid");
         SpringApplication.run(FavouritesApplication.class, args);
     }
 }

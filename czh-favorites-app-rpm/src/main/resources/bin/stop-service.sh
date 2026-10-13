@@ -3,9 +3,7 @@
 # Polite stop with SIGTERM
 #
 
-app="czh-favorites"
-
-pid_file=/var/run/czh-favorites/$app.pid
+pid_file=/var/run/czh/favorites/.pid
 
 if [[ -f $pid_file ]]
 then

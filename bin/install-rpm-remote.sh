@@ -25,16 +25,14 @@ esac
 
 echo "installing to $host"
 
-./mvn.sh install -Dbuild.rpms
+./mvn.sh clean install -Drpm=true
 
-scp czh-favourites/czh-favourites-rpm/target/czh-czh-favourites-rpm-0.0.1-*.noarch.rpm \
-    $host:/tmp/czh-czh-favourites-rpm.noarch.rpm
-scp czh-favourites-admin/czh-favourites-admin-rpm/target/czh-czh-favourites-admin-rpm-0.0.1-*.noarch.rpm \
-    $host:/tmp/czh-czh-favourites-admin-rpm.noarch.rpm
+scp czh-favorites-app-rpm/target/czh-favorites-app-rpm-0.0.1-*.noarch.rpm $host:/tmp/czh-favorites-app-rpm.noarch.rpm
+scp czh-favorites-db-rpm/target/czh-favorites-db-rpm-0.0.1-*.noarch.rpm $host:/tmp/czh-favorites-db-rpm.noarch.rpm
 
 ssh $host '
-rpm --erase czh-czh-favourites-rpm
-rpm --erase czh-czh-favourites-admin-rpm
-rpm --nodeps -ivh /tmp/czh-czh-favourites-rpm.noarch.rpm
-rpm --nodeps -ivh /tmp/czh-czh-favourites-admin-rpm.noarch.rpm
+rpm --erase czh-favorites-app-rpm
+rpm --erase czh-favorites-db-rpm
+rpm --nodeps -ivh /tmp/czh-favorites-app-rpm.noarch.rpm
+rpm --nodeps -ivh /tmp/czh-favorites-db-rpm.noarch.rpm
 '

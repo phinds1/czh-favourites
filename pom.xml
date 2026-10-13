@@ -52,6 +52,7 @@
 		<commons-io.version>2.16.1</commons-io.version>
 		<commons-cli.version>1.6.0</commons-cli.version>
 		<jakarta-annotation.version>3.0.0</jakarta-annotation.version>
+		<czh-mscommon.version>0.0.1-SNAPSHOT</czh-mscommon.version>
 
 	</properties>
 
@@ -136,6 +137,12 @@
 				<artifactId>hsqldb</artifactId>
 				<version>${hsqldb.version}</version>
 				<scope>test</scope>
+			</dependency>
+			<!-- czh-mscommon shared library (pid file, feature switches auto-config) -->
+			<dependency>
+				<groupId>cz.bsl.gis</groupId>
+				<artifactId>czh-mscommon-lib</artifactId>
+				<version>${czh-mscommon.version}</version>
 			</dependency>
 		</dependencies>
 

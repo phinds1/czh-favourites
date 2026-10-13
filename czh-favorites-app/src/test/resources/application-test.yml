@@ -10,6 +10,10 @@ spring:
     init:
       mode: never
 
+mscommon:
+  features:
+    enabled: false
+
 management:
   server:
     port: 0

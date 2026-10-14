@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:db2://vip.pddb:50000/PDDB
+    driver-class-name: com.ibm.db2.jcc.DB2Driver
+    username: gtkinst1
+    password: gtkinst1
+    hikari:
+      pool-name: FavouritesTestPool
+  sql:
+    init:
+      mode: never
+
+mscommon:
+  features:
+    enabled: false
+
+management:
+  server:
+    port: 0
+
+logging:
+  level:
+    root: WARN
+    cz.bsl.favourites: DEBUG

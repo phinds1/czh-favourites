@@ -8,9 +8,9 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/log/czh-favorites/spring.log</file>
+        <file>/var/log/favorites/spring.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/var/log/czh-favorites/spring.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <fileNamePattern>/var/log/favorites/spring.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>

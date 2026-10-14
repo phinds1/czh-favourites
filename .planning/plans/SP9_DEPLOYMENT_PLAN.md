@@ -45,7 +45,7 @@ Mirror `money-app-rpm/pom.xml` with these substitutions:
 | `money-app-rpm`                  | `czh-favorites-app-rpm`              |
 | `/opt/czh-money`                 | `/opt/czh-favorites`                 |
 | `czh-money-app.jar`              | `czh-favorites-app.jar`              |
-| `/var/log/czh-money/`            | `/var/log/czh-favorites/`            |
+| `/var/log/money/`                | `/var/log/favorites/`                |
 | `/var/run/czh-money/`            | `/var/run/czh-favorites/`            |
 | `/etc/czh-money`                 | `/etc/czh-favorites`                 |
 | `czh-money.service`              | `czh-favorites.service`              |

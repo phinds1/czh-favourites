@@ -127,7 +127,7 @@ czh-favorites-db/    src/main/delta/               db2delta SQL scripts — no J
 
 czh-favorites-app-rpm/  src/main/resources/       (SP9) App RPM: fat-jar → /opt/czh-favorites/lib/
                          bin/                        start/stop/status/kill/version scripts
-                         config/                     logback-spring.xml for /var/log/czh-favorites/
+                         config/                     logback-spring.xml for /var/log/favorites/
                          service/                    czh-favorites.service (systemd; /opt/jdk-25/bin/java)
 
 czh-favorites-db-rpm/   src/main/bin/             (SP9) DB delta RPM: SQL → /opt/czh-favorites-db/structure/

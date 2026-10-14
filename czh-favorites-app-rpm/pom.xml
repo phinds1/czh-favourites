@@ -167,13 +167,7 @@
                                 </entry>
 
                                 <entry>
-                                    <name>/var/log/czh-favorites/</name>
-                                    <directory>true</directory>
-                                    <ruleset>main</ruleset>
-                                </entry>
-
-                                <entry>
-                                    <name>/var/run/czh-favorites/</name>
+                                    <name>/var/log/favorites</name>
                                     <directory>true</directory>
                                     <ruleset>main</ruleset>
                                 </entry>
@@ -221,7 +215,7 @@
                                 <!-- symlink: log dir -->
                                 <entry>
                                     <name>/opt/czh-favorites/log</name>
-                                    <linkTo>/var/log/czh-favorites</linkTo>
+                                    <linkTo>/var/log/favorites</linkTo>
                                     <user>${run.as.user}</user>
                                     <group>${run.as.group}</group>
                                 </entry>

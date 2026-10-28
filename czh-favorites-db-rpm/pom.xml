@@ -86,7 +86,7 @@
                                         <rule>
                                             <when>
                                                 <type>file</type>
-                                                <suffix>sql</suffix>
+                                                <suffix>delta</suffix>
                                             </when>
                                             <mode>0644</mode>
                                         </rule>
@@ -121,7 +121,7 @@
                                     <name>${install.root}/structure</name>
                                     <collect>
                                         <from>${basedir}/../czh-favorites-db/src/main/delta</from>
-                                        <includes>*.sql</includes>
+                                        <includes>*.delta</includes>
                                     </collect>
                                     <ruleset>main</ruleset>
                                 </entry>

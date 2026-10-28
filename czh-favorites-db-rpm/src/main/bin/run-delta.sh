@@ -20,4 +20,4 @@ DB_PASS="${3:-gtkinst1}"
 # -x = script mode (minimal output, strict exit codes); the deploy job parses exit codes.
 # Apply every .sql in the structure dir; db2delta skips changesets already recorded in its
 # changelog table, so re-running is idempotent.
-exec /usr/bin/db2delta -x apply -d "${DB_DSN}" -u "${DB_USER}" -p "${DB_PASS}" structure
+exec /usr/bin/db2delta apply -d "${DB_DSN}" -u "${DB_USER}" -p "${DB_PASS}" structure

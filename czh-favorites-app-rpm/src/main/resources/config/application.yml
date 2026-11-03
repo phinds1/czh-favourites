@@ -20,6 +20,17 @@ mscommon:
 management:
   server:
     port: 9481
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 logging:
   level:

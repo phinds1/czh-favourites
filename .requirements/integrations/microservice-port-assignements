@@ -14,3 +14,5 @@ In order to ensure we can co-host for production deployments and test setups we 
 | features     | 9980           | 9981            |                 |
 | legacy gis   | 8180           |                 |                 |
 | leg gateway  | 8280           |                 |                 |
+| gisorch      | 14080          | 14081           |                 |
+| vision-gateway | 15080        | 15081             |                 |

@@ -13,7 +13,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>czh-favorites-app</artifactId>
     <packaging>jar</packaging>
-    <description>czh-favourites Spring Boot 4 application — favourites microservice</description>
+    <description>czh-favorites Spring Boot 4 application — favorites microservice</description>
 
     <dependencies>
         <!-- API models -->
@@ -115,7 +115,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>cz.bsl.favourites.FavouritesApplication</mainClass>
+                    <mainClass>cz.bsl.favorites.FavoritesApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>

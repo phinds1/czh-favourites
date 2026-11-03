@@ -1,8 +1,8 @@
 /* global GisApi, GisGui, GisProm, GisChart */
-/* operations.js — per-op ok/error TPM graphs for czh-favourites.
+/* operations.js — per-op ok/error TPM graphs for czh-favorites.
  *
- * Discovers ops DYNAMICALLY from favourites_wager_operation_total and
- * favourites_group_operation_total labels (do NOT hardcode the op list):
+ * Discovers ops DYNAMICALLY from favorites_wager_operation_total and
+ * favorites_group_operation_total labels (do NOT hardcode the op list):
  * for each op seen in the scrape, render one graph with two series — outcome="ok" (green) and
  * outcome="failure" (red) — graphed as TPM (transactions-per-minute) computed from the counter
  * delta vs the previous scrape.
@@ -13,7 +13,7 @@
  * Both counter families are LAZY (absent until the first op fires); the tab shows "no operations
  * yet" until traffic, then fills in as ops run.
  *
- * Grep anchor: favourites
+ * Grep anchor: favorites
  */
 (function () {
     var OK_COLOR = '#00cc66';
@@ -41,9 +41,9 @@
         var ops = {};
         rows.forEach(function (r) {
             var family;
-            if (r.name === 'favourites_wager_operation_total') {
+            if (r.name === 'favorites_wager_operation_total') {
                 family = 'wager';
-            } else if (r.name === 'favourites_group_operation_total') {
+            } else if (r.name === 'favorites_group_operation_total') {
                 family = 'group';
             } else {
                 return;
@@ -120,7 +120,7 @@
                 '<div class="row">' +
                   '<div class="col-md-12"><p class="snapshot-section">Per-Operation Ok / Error (TPM)</p>' +
                     '<div class="row" id="op-graphs"></div>' +
-                    '<p class="text-secondary mt-1" style="font-size:0.7rem">One graph per op (discovered from favourites_wager_operation_total / favourites_group_operation_total labels). ok=green, failure=red. ' + GRAPH_WINDOW_SECS + 's window. New ops appear automatically.</p>' +
+                    '<p class="text-secondary mt-1" style="font-size:0.7rem">One graph per op (discovered from favorites_wager_operation_total / favorites_group_operation_total labels). ok=green, failure=red. ' + GRAPH_WINDOW_SECS + 's window. New ops appear automatically.</p>' +
                   '</div>' +
                 '</div>' +
                 '<p class="snapshot-section">Operation Counts</p>' +

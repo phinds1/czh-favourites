@@ -1,8 +1,8 @@
 # SP4: Test Infrastructure — Detailed Implementation Plan
 
 **Sub-plan:** SP4 of 10  
-**Sanename:** `favourites`  
-**Root package:** `cz.bsl.czh.favourites`  
+**Sanename:** `favorites`  
+**Root package:** `cz.bsl.czh.favorites`  
 **Progress state:** `.planning/state/SP4_TEST_INFRA_PROGRESS.md`
 
 ## Overview
@@ -16,7 +16,7 @@ context against HSQLDB and confirms both tables exist.
 - The project already uses HSQLDB (not H2) — confirmed in `application-test.yml`
 - `application-test.yml` already exists with `sql.init.mode=never` — keep it unchanged
 - Spring Boot 4 removed `TestRestTemplate`; use plain `RestTemplate` with a non-throwing error handler (matches `AbstractIntegrationTest` in czh-money)
-- `JamcrestUtils` is ported verbatim from `czh-money/czh-money-test` into package `cz.bsl.czh.favourites.test`
+- `JamcrestUtils` is ported verbatim from `czh-money/czh-money-test` into package `cz.bsl.czh.favorites.test`
 
 ## Context budget per phase
 
@@ -29,7 +29,7 @@ confirm the build is green before the next phase.
 ## Phase 1 — Port `JamcrestUtils`
 
 ### Goal
-`JamcrestUtils` compiles in package `cz.bsl.czh.favourites.test`.
+`JamcrestUtils` compiles in package `cz.bsl.czh.favorites.test`.
 
 ### Files to read before starting
 - `/java/czh/czh-money/czh-money-test/src/test/java/cz/bsl/money/test/JamcrestUtils.java`
@@ -40,12 +40,12 @@ confirm the build is green before the next phase.
 
 #### 1.1 — Port `JamcrestUtils.java`
 
-**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/JamcrestUtils.java`
+**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/JamcrestUtils.java`
 
 Copy from `czh-money` verbatim; change only:
-- Package declaration: `cz.bsl.czh.favourites.test`
-- Class-level Javadoc: update project name from `czh-money` to `czh-favourites`
-- Grep anchor comment: `// Grep anchor: favourites`
+- Package declaration: `cz.bsl.czh.favorites.test`
+- Class-level Javadoc: update project name from `czh-money` to `czh-favorites`
+- Grep anchor comment: `// Grep anchor: favorites`
 
 Do **not** change any method signatures, field names, or logic. This is a direct port.
 
@@ -63,7 +63,7 @@ Check that `io.github.teknopaul:jamcrest` and GraalVM JS (`org.graalvm.polyglot:
 
 ```sh
 ~/bin/geany-progress done 1 \
-  -r czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/JamcrestUtils.java \
+  -r czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/JamcrestUtils.java \
   -r czh-favorites-app/pom.xml
 ```
 
@@ -85,7 +85,7 @@ only created once even when multiple `@SpringBootTest` contexts share the same i
 
 #### 2.1 — Write `TestDatabaseConfig.java`
 
-**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/config/TestDatabaseConfig.java`
+**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/config/TestDatabaseConfig.java`
 
 Model on `czh-money`'s `TestDatabaseConfig`. Key points:
 - `@TestConfiguration` + `@Profile("test")`
@@ -105,7 +105,7 @@ if (!tableExists) {
 ```
 
 - Return the `JdbcTemplate` so tests can `@Autowired JdbcTemplate` for DB clean-up
-- Grep anchor: `favourites`
+- Grep anchor: `favorites`
 
 **Note:** `dao-test-schema.sql` was written in SP3 and already contains HSQLDB-compatible DDL for
 both tables. Reuse it — do not write a new SQL file.
@@ -118,7 +118,7 @@ both tables. Reuse it — do not write a new SQL file.
 
 ```sh
 ~/bin/geany-progress done 2 \
-  -r czh-favorites-app/src/test/java/cz/bsl/czh/favourites/config/TestDatabaseConfig.java
+  -r czh-favorites-app/src/test/java/cz/bsl/czh/favorites/config/TestDatabaseConfig.java
 ```
 
 ---
@@ -132,20 +132,20 @@ provides a `RestTemplate` that does not throw on 4xx/5xx, and exposes `asPlayer(
 
 ### Files to read before starting
 - `/java/czh/czh-money/czh-money-test/src/test/java/cz/bsl/money/test/AbstractIntegrationTest.java`
-- `czh-favorites-app/src/main/java/cz/bsl/favourites/FavouritesApplication.java`
-- `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/config/TestDatabaseConfig.java` (Phase 2 output)
-- `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/JamcrestUtils.java` (Phase 1 output)
+- `czh-favorites-app/src/main/java/cz/bsl/favorites/FavoritesApplication.java`
+- `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/config/TestDatabaseConfig.java` (Phase 2 output)
+- `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/JamcrestUtils.java` (Phase 1 output)
 
 ### Tasks
 
 #### 3.1 — Write `AbstractRestTest.java`
 
-**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/AbstractRestTest.java`
+**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/AbstractRestTest.java`
 
 ```java
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = {FavouritesApplication.class, TestDatabaseConfig.class}
+    classes = {FavoritesApplication.class, TestDatabaseConfig.class}
 )
 @ActiveProfiles("test")
 public abstract class AbstractRestTest {
@@ -196,7 +196,7 @@ public abstract class AbstractRestTest {
 Add a `@Bean JamcrestUtils jamcrestUtils()` to a `@TestConfiguration` inner class or to
 `TestDatabaseConfig` — whichever is cleaner. Follow the czh-money pattern exactly.
 
-Grep anchor: `favourites`
+Grep anchor: `favorites`
 
 #### 3.2 — Build verify
 
@@ -206,7 +206,7 @@ Grep anchor: `favourites`
 
 ```sh
 ~/bin/geany-progress done 3 \
-  -r czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/AbstractRestTest.java
+  -r czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/AbstractRestTest.java
 ```
 
 ---
@@ -214,21 +214,21 @@ Grep anchor: `favourites`
 ## Phase 4 — Write smoke test
 
 ### Goal
-`FavouritesRestSmokeTest` verifies the Spring context boots, HSQLDB tables exist, and the
+`FavoritesRestSmokeTest` verifies the Spring context boots, HSQLDB tables exist, and the
 `/actuator/health` endpoint returns 200.
 
 ### Files to read before starting
-- `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/AbstractRestTest.java` (Phase 3 output)
+- `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/AbstractRestTest.java` (Phase 3 output)
 - `czh-favorites-app/src/main/resources/application.yml` (management port)
 
 ### Tasks
 
-#### 4.1 — Write `FavouritesRestSmokeTest.java`
+#### 4.1 — Write `FavoritesRestSmokeTest.java`
 
-**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/FavouritesRestSmokeTest.java`
+**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/FavoritesRestSmokeTest.java`
 
 ```java
-class FavouritesRestSmokeTest extends AbstractRestTest {
+class FavoritesRestSmokeTest extends AbstractRestTest {
 
     @Test
     void contextLoads_tablesExist() {
@@ -269,7 +269,7 @@ test-only convenience — production keeps port 9291 separate.
 
 ```sh
 ~/bin/geany-progress done 4 \
-  -r czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/FavouritesRestSmokeTest.java \
+  -r czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/FavoritesRestSmokeTest.java \
   -r czh-favorites-app/src/test/resources/application-test.yml \
   -w "Tests deferred if norun active. Run ./mvn.sh -pl czh-favorites-app test when clear."
 ```
@@ -309,7 +309,7 @@ that SP6 will need (e.g. `asAdmin`, clean-DB helper). Add them now if obvious.
 
 #### 5.5 — Routing map
 
-Run `/routing-map` to record `cz.bsl.czh.favourites.test` in `.requirements/design/routing.md`.
+Run `/routing-map` to record `cz.bsl.czh.favorites.test` in `.requirements/design/routing.md`.
 
 #### 5.6 — Write progress state
 

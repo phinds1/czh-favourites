@@ -1,8 +1,8 @@
 # SP10: Vision GUI — Detailed Implementation Plan
 
 **Sub-plan:** SP10 of 10  
-**Sanename:** `favourites`  
-**Root package:** `cz.bsl.favourites.config` (GuiWebConfig only)  
+**Sanename:** `favorites`  
+**Root package:** `cz.bsl.favorites.config` (GuiWebConfig only)  
 **Progress state:** `.planning/state/SP10_VISION_GUI_PROGRESS.md`
 
 ## Overview
@@ -13,8 +13,8 @@ Implement the operator Vision GUI — a single-page dark-theme dashboard served 
 | Tab             | Data source                                                | Key content |
 |-----------------|------------------------------------------------------------|-------------|
 | **Server**      | `/actuator/health`, `/actuator/prometheus`                  | UP/DOWN badge, db status, uptime, JVM heap bar |
-| **Operations**  | `/actuator/prometheus`                                      | Per-op TPM bar graphs from `favourites_wager_operation_total` + `favourites_group_operation_total` |
-| **Player Lookup** | `/admin/favourites/players/{id}/wagers` + `/groups`      | playerId input, wager/group count, wager name table |
+| **Operations**  | `/actuator/prometheus`                                      | Per-op TPM bar graphs from `favorites_wager_operation_total` + `favorites_group_operation_total` |
+| **Player Lookup** | `/admin/favorites/players/{id}/wagers` + `/groups`      | playerId input, wager/group count, wager name table |
 
 Most JS is **copied verbatim** from the czh-money reference in
 `references/czh-money/money-app/src/main/resources/gui/`.
@@ -37,12 +37,12 @@ Only `operations.js` is adapted (metric names) and `player-lookup.js` is new.
 
 #### 1.1 — Create `GuiWebConfig.java`
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/favourites/config/GuiWebConfig.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/favorites/config/GuiWebConfig.java`
 
 ```java
-package cz.bsl.favourites.config;
+package cz.bsl.favorites.config;
 
-// Grep anchor: favourites
+// Grep anchor: favorites
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -83,8 +83,8 @@ Copy **exactly** from `references/czh-money/money-app/src/main/resources/gui/`:
 
 Port `references/czh-money/.../index.html` with these substitutions:
 
-- `<title>czh-money 👀</title>` → `<title>czh-favourites Vision 👀</title>`
-- Navbar brand text: `czh-money Vision 👀` → `czh-favourites Vision 👀`
+- `<title>czh-money 👀</title>` → `<title>czh-favorites Vision 👀</title>`
+- Navbar brand text: `czh-money Vision 👀` → `czh-favorites Vision 👀`
 - Script tags: replace `snapshots/operations.js` + `snapshots/metrics.js` with:
   ```html
   <script src="/gui/js/snapshots/server.js"></script>
@@ -100,22 +100,22 @@ Copy `references/czh-money/.../snapshots/server.js` to
 `GisGui.registerSnapshot('server', 'Server', ...)` — the registration call is already correct
 (generic tab name); no change needed. Copy verbatim.
 
-#### 1.5 — Add smoke test to `FavouritesRestSmokeTest`
+#### 1.5 — Add smoke test to `FavoritesRestSmokeTest`
 
 Add one test:
 ```java
 @Test void guiIndex_returns200() {
     ResponseEntity<String> resp = restTemplate.getForEntity("/gui/index.html", String.class);
     assertEquals(200, resp.getStatusCode().value());
-    assertTrue(resp.getBody().contains("czh-favourites Vision"));
+    assertTrue(resp.getBody().contains("czh-favorites Vision"));
 }
 ```
 
 ```sh
 ~/bin/geany-progress done 1 \
-  -r czh-favorites-app/src/main/java/cz/bsl/favourites/config/GuiWebConfig.java \
+  -r czh-favorites-app/src/main/java/cz/bsl/favorites/config/GuiWebConfig.java \
   -r czh-favorites-app/src/main/resources/gui/index.html \
-  -r czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/FavouritesRestSmokeTest.java \
+  -r czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/FavoritesRestSmokeTest.java \
   -w "norun active. Test smoke with: ./mvn.sh -pl czh-favorites-app test after clear."
 ```
 
@@ -124,15 +124,15 @@ Add one test:
 ## Phase 2 — Operations tab (`operations.js`)
 
 ### Goal
-`operations.js` discovers ops dynamically from `favourites_wager_operation_total` and
-`favourites_group_operation_total` counters and renders one TPM bar graph per op.
+`operations.js` discovers ops dynamically from `favorites_wager_operation_total` and
+`favorites_group_operation_total` counters and renders one TPM bar graph per op.
 
 ### Files to read before starting
 - `references/czh-money/money-app/src/main/resources/gui/js/snapshots/operations.js`
   (entire file — adapt, do not rewrite from scratch)
-- `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/metrics/FavouritesMetrics.java`
-  (counter name constants: `WAGER_COUNTER = "favourites.wager.operation"` →
-  Prometheus renders as `favourites_wager_operation_total`)
+- `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/metrics/FavoritesMetrics.java`
+  (counter name constants: `WAGER_COUNTER = "favorites.wager.operation"` →
+  Prometheus renders as `favorites_wager_operation_total`)
 
 ### Tasks
 
@@ -147,24 +147,24 @@ Port from czh-money `operations.js` with these changes:
    // czh-money had:
    if (r.name !== 'money_operation_total') return;
    // replace with two checks (wager + group are separate counter families):
-   if (r.name !== 'favourites_wager_operation_total' && r.name !== 'favourites_group_operation_total') return;
+   if (r.name !== 'favorites_wager_operation_total' && r.name !== 'favorites_group_operation_total') return;
    ```
 
 2. **Op key prefix** — include the metric family in the graph title so wager and group ops are
    distinguished:
    ```js
    // When building the op label shown in the graph card, prefix with the family:
-   // "favourites_wager_operation_total" + op="create" → graph title: "wager / create"
+   // "favorites_wager_operation_total" + op="create" → graph title: "wager / create"
    var family = r.name.includes('wager') ? 'wager' : 'group';
    var opKey = family + '/' + r.labels.op;
    ```
    Use `opKey` as the key in `prevSample` and `graphs` maps (replacing bare `op`).
 
 3. **Comment update** — replace all references to `money_operation_total` with
-   `favourites_wager_operation_total` / `favourites_group_operation_total`.
+   `favorites_wager_operation_total` / `favorites_group_operation_total`.
 
 4. **Footer text** — replace `"discovered from money_operation_total labels"` with
-   `"discovered from favourites_wager_operation_total / favourites_group_operation_total labels"`.
+   `"discovered from favorites_wager_operation_total / favorites_group_operation_total labels"`.
 
 5. **Tab registration** — keep `GisGui.registerSnapshot('operations', 'Operations', ...)`.
 
@@ -187,8 +187,8 @@ API (SP7) and displays wager count, group count, and a scrollable table of wager
 
 ### Files to read before starting
 - `references/czh-money/money-app/src/main/resources/gui/js/api.js` (GisApi.get — use for fetch)
-- `czh-favorites-app/src/main/java/cz/bsl/favourites/web/AdminFavouritesController.java`
-  (endpoint paths: `/admin/favourites/players/{id}/wagers` and `/groups`)
+- `czh-favorites-app/src/main/java/cz/bsl/favorites/web/AdminFavoritesController.java`
+  (endpoint paths: `/admin/favorites/players/{id}/wagers` and `/groups`)
 
 ### Tasks
 
@@ -201,8 +201,8 @@ This is a new file with no czh-money equivalent.
 ```js
 /* global GisApi, GisGui */
 /* player-lookup.js — admin player lookup tab.
- * Calls /admin/favourites/players/{id}/wagers and /groups on submit.
- * Grep anchor: favourites
+ * Calls /admin/favorites/players/{id}/wagers and /groups on submit.
+ * Grep anchor: favorites
  */
 (function () {
     var built = false;
@@ -233,8 +233,8 @@ This is a new file with no czh-money equivalent.
         result.innerHTML = '<span class="text-secondary small font-monospace">Loading…</span>';
 
         var res = await Promise.allSettled([
-            GisApi.get('/admin/favourites/players/' + encodeURIComponent(playerId) + '/wagers'),
-            GisApi.get('/admin/favourites/players/' + encodeURIComponent(playerId) + '/groups')
+            GisApi.get('/admin/favorites/players/' + encodeURIComponent(playerId) + '/wagers'),
+            GisApi.get('/admin/favorites/players/' + encodeURIComponent(playerId) + '/groups')
         ]);
 
         var wagersOk  = res[0].status === 'fulfilled';

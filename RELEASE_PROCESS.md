@@ -31,11 +31,11 @@ Where:
 
 Please make sure all checks in GitHub actions have completed sucessfully, if not, the Azure builds will not be triggered:
 
-https://github.com/igt-LotteryServiceDelivery/czh-favourites/actions/workflows/prepare-release-action-branch.yaml
+https://github.com/igt-LotteryServiceDelivery/czh-favorites/actions/workflows/prepare-release-action-branch.yaml
 
 Azure DevOps link to release build:
 
-https://dev.azure.com/IGT-Lottery/Devops%20Core%20Systems%20-%20Non-Production/_build?definitionScope=%5CMaven%5Cczh-favourites
+https://dev.azure.com/IGT-Lottery/Devops%20Core%20Systems%20-%20Non-Production/_build?definitionScope=%5CMaven%5Cczh-favorites
 
 **Maven Build Release Action Branch**
 

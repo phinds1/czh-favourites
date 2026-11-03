@@ -1,12 +1,12 @@
-# czh-favourites Migration — Plan Index
+# czh-favorites Migration — Plan Index
 
-This document divides the `czh-favourites` Spring Boot 4 / Java 25 microservice build into
+This document divides the `czh-favorites` Spring Boot 4 / Java 25 microservice build into
 discrete sub-plans. Each sub-plan is scoped to fit in a single Claude Sonnet 4.6 context window
 for detailed planning and implementation. Sub-plans are ordered by dependency: later plans depend
 on earlier ones, though SP6 and SP7 can be worked in parallel once SP4 and SP5 are complete.
 
-The sanename for this project is **`favourites`**. Every class, log message, test file, and grep
-anchor must use the word `favourites` so that `grep favourites` finds everything related to this
+The sanename for this project is **`favorites`**. Every class, log message, test file, and grep
+anchor must use the word `favorites` so that `grep favorites` finds everything related to this
 microservice.
 
 ---
@@ -19,9 +19,9 @@ microservice.
 | SP2  | JSON API Models       | `czh-favorites-api` DTOs: wager, group, page wrappers, WagerDto                | SP1        |
 | SP3  | DAO Layer             | `GIS_FAV_GROUP` + `GIS_FAV_WAGER`, JdbcTemplate DAOs, delta scripts            | SP1        |
 | SP4  | Test Infrastructure   | `AbstractRestTest`, `TestDatabaseConfig` H2, `PlayerContextResolver`           | SP2,SP3    |
-| SP5  | Service Layer         | `FavouritesService`, `FavouritesConverter`, `FavouritesValidator`, `CdcReader` | SP2,SP3    |
-| SP6  | Favourites Controller | `FavouritesController` (wager + group endpoints), Jamcrest tests               | SP4,SP5    |
-| SP7  | Admin API             | `AdminFavouritesController` (read-only admin view), Jamcrest tests             | SP4,SP5    |
+| SP5  | Service Layer         | `FavoritesService`, `FavoritesConverter`, `FavoritesValidator`, `CdcReader` | SP2,SP3    |
+| SP6  | Favorites Controller | `FavoritesController` (wager + group endpoints), Jamcrest tests               | SP4,SP5    |
+| SP7  | Admin API             | `AdminFavoritesController` (read-only admin view), Jamcrest tests             | SP4,SP5    |
 | SP8  | Prometheus Metrics    | Health, request-count, success/failure counters wired to service               | SP6,SP7    |
 | SP9  | Deployment            | App RPM, DB RPM, GitHub Actions YAML, Azure DevOps YAML, systemd               | SP8        |
 | SP10 | Vision GUI            | Dark-theme operator GUI: Server, Operations, Player Lookup tabs                | SP8        |
@@ -68,7 +68,7 @@ are measured from the start.
 
 | File                                                                                    | Purpose                                                            |
 |-----------------------------------------------------------------------------------------|--------------------------------------------------------------------|
-| `/java/czh/czh-favourites/pom.xml`                                                      | Root POM — JaCoCo already wired; fix `<modules>` section           |
+| `/java/czh/czh-favorites/pom.xml`                                                      | Root POM — JaCoCo already wired; fix `<modules>` section           |
 | `/java/czh/czh-money/pom.xml`                                                           | Exact POM structure to mirror (3 modules, BOM, JaCoCo)             |
 | `/java/czh/czh-money/money-app/src/main/resources/application.yml`                      | Config style: port, datasource profiles, actuator                  |
 | `/java/czh/czh-money/money-app/src/main/java/cz/bsl/money/MoneyApplication.java`        | `@SpringBootApplication` entry point style                         |
@@ -87,12 +87,12 @@ czh-favorites-api/
 
 czh-favorites-app/
   pom.xml                                      # SB4 executable jar, depends on czh-favorites-api
-  src/main/java/cz/bsl/czh/favourites/
-    FavouritesApplication.java                 # @SpringBootApplication entry point
+  src/main/java/cz/bsl/czh/favorites/
+    FavoritesApplication.java                 # @SpringBootApplication entry point
     config/
       DataSourceConfig.java                    # HikariCP + DB2 prod / H2 test profile switching
   src/main/resources/
-    application.yml                            # port 9290, datasource, actuator/prometheus, favourites.*
+    application.yml                            # port 9290, datasource, actuator/prometheus, favorites.*
     logback-spring.xml
 
 czh-favorites-db/
@@ -108,22 +108,22 @@ None — this is the foundation.
 ### Suggested detailed-plan prompt
 
 > Read the following before planning:
-> - `/java/czh/czh-favourites/pom.xml` (current root POM — note the incorrect `<modules>` and existing JaCoCo config)
+> - `/java/czh/czh-favorites/pom.xml` (current root POM — note the incorrect `<modules>` and existing JaCoCo config)
 > - `/java/czh/czh-money/pom.xml` (root POM shape to follow)
 > - `/java/czh/czh-money/money-app/src/main/resources/application.yml` (config style)
 > - `/java/czh/czh-money/money-app/src/main/java/cz/bsl/money/config/DataSourceConfig.java` (datasource pattern)
 > - `/java/czh/czh-money/bin/coverage.sh` (coverage script to adapt)
 > - `.requirements/design/hld.md`
-> - `.planning/java25-spring-boot-migration.md` (sanename=`favourites`, package=`cz.bsl.favourites`,
->   config property block under `favourites:`, CDC file at `/run/mx/cdc`)
+> - `.planning/java25-spring-boot-migration.md` (sanename=`favorites`, package=`cz.bsl.favorites`,
+>   config property block under `favorites:`, CDC file at `/run/mx/cdc`)
 >
 > Create a detailed implementation plan for SP1 Project Scaffold:
 > - Fix `<modules>` in root `pom.xml` to list `czh-favorites-api`, `czh-favorites-app`, `czh-favorites-db`
 > - Write `czh-favorites-api/pom.xml` (jar, inherits root, no SB dependency)
 > - Write `czh-favorites-app/pom.xml` (SB4 executable jar, depends on czh-favorites-api)
-> - Write `FavouritesApplication.java` in package `cz.bsl.favourites`
+> - Write `FavoritesApplication.java` in package `cz.bsl.favorites`
 > - Write `application.yml` for port 9290 (app) / 9291 (management), datasource (DB2 prod / H2 test),
->   actuator/prometheus, and the `favourites.*` config properties from the migration doc
+>   actuator/prometheus, and the `favorites.*` config properties from the migration doc
 > - Write `DataSourceConfig.java` wiring HikariCP to DB2 (prod) or H2 (test profile)
 > - Write `bin/coverage.sh` adapting `/java/czh/czh-money/bin/coverage.sh` to reference `czh-favorites-*` modules
 > - Confirm JaCoCo `prepare-agent` execution is present and active in root POM (it is; just verify)
@@ -136,7 +136,7 @@ None — this is the foundation.
 ### Scope
 Port the four legacy DTOs from `gateway-draw-games-rest-api` to the `czh-favorites-api` module,
 clean of all JAX-RS, Jackson 1.x, and Joda Time. Copy `WagerDto` (the nested wager sub-object)
-from the legacy `WagerDTO`. All classes land in `cz.bsl.favourites.api`. Add Jackson 2
+from the legacy `WagerDTO`. All classes land in `cz.bsl.favorites.api`. Add Jackson 2
 annotations and `java.time.Instant` where dates occur. No Hibernate Validator — plain-Java static
 validation helper methods only.
 
@@ -160,14 +160,14 @@ on it.
 ### Key classes / files to create
 
 ```
-czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/
+czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/
   FavouriteWagerDto.java          # id, playerId, groupNumber, gameName, wagerName, flags, createdAt, wager
   FavouriteGroupDto.java          # id, playerId, groupNumber, groupName, flags, createdAt, updatedAt
   FavouriteWagerPageDto.java      # items: List<FavouriteWagerDto>, totalCount
   FavouriteGroupPageDto.java      # items: List<FavouriteGroupDto>, totalCount
   WagerDto.java                   # gameName, stake, price, duration, serialNumber, boards
 
-czh-favorites-api/src/test/java/cz/bsl/czh/favourites/api/
+czh-favorites-api/src/test/java/cz/bsl/czh/favorites/api/
   FavouriteWagerDtoTest.java      # Jackson round-trip: serialize -> deserialize -> assertEquals
   FavouriteGroupDtoTest.java      # Jackson round-trip
   WagerDtoTest.java               # Jackson round-trip; confirm no data loss on boards/stacks
@@ -188,19 +188,19 @@ SP1 (root POM must declare `czh-favorites-api` as a module).
 > - `.planning/java25-spring-boot-migration.md` (DTO mapping table; fields to keep / drop)
 >
 > Create a detailed implementation plan for SP2: JSON API Models.
-> - Port each of the four DTOs plus `WagerDto` into `cz.bsl.favourites.api`
+> - Port each of the four DTOs plus `WagerDto` into `cz.bsl.favorites.api`
 > - Remove all JAX-RS, Jackson 1.x (`org.codehaus.jackson`), Joda Time, and Hibernate Validator imports
 > - Add Jackson 2 (`com.fasterxml.jackson.annotation`) annotations; use `java.time.Instant` for timestamps
 > - `FavouriteWagerDto` must round-trip cleanly to/from JSON with no data loss on `boards`
 > - Write a Jackson round-trip JUnit 5 test for each DTO
-> Package: `cz.bsl.favourites.api`
+> Package: `cz.bsl.favorites.api`
 
 ---
 ## SP3: DAO Layer
 
 ### Scope
 Create the two new tables (`GIS_FAV_GROUP`, `GIS_FAV_WAGER`) as db2delta scripts, and implement
-`FavouritesGroupDao` and `FavouritesWagerDao` using `JdbcTemplate`. All SQL is readable
+`FavoritesGroupDao` and `FavoritesWagerDao` using `JdbcTemplate`. All SQL is readable
 named-constant strings inside the DAO class. The wager DAO serialises/deserialises the
 `FavouriteWagerDto` wager sub-object as JSON into `WAGER_JSON`. Provide `RowMapper` implementations
 for both tables.
@@ -228,18 +228,18 @@ czh-favorites-db/src/main/delta/
   001-create-gis-fav-group.sql     # db2delta format: GIS_FAV_GROUP + UQ constraint + validation
   002-create-gis-fav-wager.sql     # db2delta format: GIS_FAV_WAGER + 3 indexes + validation
 
-czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/
-  FavouritesGroupDao.java          # CRUD on GIS_FAV_GROUP via JdbcTemplate + RowMapper inner class
+czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/
+  FavoritesGroupDao.java          # CRUD on GIS_FAV_GROUP via JdbcTemplate + RowMapper inner class
                                    #   insert, findByPlayer, findByPlayerAndGroup,
                                    #   updateName, delete, countByPlayer
-  FavouritesWagerDao.java          # CRUD on GIS_FAV_WAGER via JdbcTemplate + RowMapper inner class
+  FavoritesWagerDao.java          # CRUD on GIS_FAV_WAGER via JdbcTemplate + RowMapper inner class
                                    #   insert, findById, findByPlayer, findByPlayerAndGroup,
                                    #   findByPlayerAndGame, update, delete, countByPlayer
                                    #   serialises/deserialises WAGER_JSON via Jackson ObjectMapper
 
-czh-favorites-app/src/test/java/cz/bsl/czh/favourites/dao/
-  FavouritesGroupDaoTest.java      # HSQL in-memory: insert, find, update, delete, count
-  FavouritesWagerDaoTest.java      # HSQL in-memory: insert, find by group/game, JSON round-trip
+czh-favorites-app/src/test/java/cz/bsl/czh/favorites/dao/
+  FavoritesGroupDaoTest.java      # HSQL in-memory: insert, find, update, delete, count
+  FavoritesWagerDaoTest.java      # HSQL in-memory: insert, find by group/game, JSON round-trip
 ```
 
 ### Dependencies on other sub-plans
@@ -258,12 +258,12 @@ SP1 (DataSourceConfig provides JdbcTemplate), SP2 (FavouriteWagerDto for WAGER_J
 > Create a detailed implementation plan for SP3: DAO Layer.
 > - Write two delta scripts in db2delta format for `czh-favorites-db/src/main/delta/`
 >   (use exact DDL from migration doc; include validation changesets)
-> - Implement `FavouritesGroupDao` with `JdbcTemplate`; SQL as named String constants; `RowMapper` inner class
-> - Implement `FavouritesWagerDao` with `JdbcTemplate`; serialise `WagerDto` sub-object to/from JSON
+> - Implement `FavoritesGroupDao` with `JdbcTemplate`; SQL as named String constants; `RowMapper` inner class
+> - Implement `FavoritesWagerDao` with `JdbcTemplate`; serialise `WagerDto` sub-object to/from JSON
 >   in `WAGER_JSON` using Jackson `ObjectMapper`; `RowMapper` inner class
 > - JUnit 5 tests using HSQL in-memory for each DAO method
 > - Test must verify JSON round-trip for `WAGER_JSON`: write wager -> read it back -> assert fields equal
-> Package: `cz.bsl.favourites.dao`
+> Package: `cz.bsl.favorites.dao`
 
 ---
 ## SP4: Test Infrastructure
@@ -291,12 +291,12 @@ and delta scripts work correctly before the real features are implemented.
 ### Key classes / files to create
 
 ```
-czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/
+czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/
   AbstractRestTest.java            # @SpringBootTest(RANDOM_PORT), TestRestTemplate, Jamcrest helpers
                                    # asPlayer(playerId) sets X-Player-Id header on requests
                                    # prints suggestJsonDefinition() to stdout when .resp.js missing
 
-czh-favorites-app/src/test/java/cz/bsl/czh/favourites/config/
+czh-favorites-app/src/test/java/cz/bsl/czh/favorites/config/
   TestDatabaseConfig.java          # @Profile("test"): creates GIS_FAV_GROUP + GIS_FAV_WAGER in H2
                                    # applies delta SQL from czh-favorites-db/src/main/delta/
 
@@ -325,18 +325,18 @@ SP2 (DTO classes needed by test context), SP3 (H2 schema matches GIS_FAV_* DDL f
 >   `GIS_FAV_WAGER` tables from the delta SQL files
 > - `application-test.yml` with H2 datasource and `spring.profiles.active=test`
 > - A smoke test (`AbstractRestTestSmokeTest`) verifying the Spring context starts and H2 tables exist
-> Package: `cz.bsl.favourites.test`
+> Package: `cz.bsl.favorites.test`
 
 ---
 ## SP5: Service Layer
 
 ### Scope
-Implement `FavouritesService` (interface + `DefaultFavouritesService`), `FavouritesConverter`,
-`FavouritesValidator`, `PlayerContextResolver`, `FavouritesProperties`, and `CdcReader`. Port
+Implement `FavoritesService` (interface + `DefaultFavoritesService`), `FavoritesConverter`,
+`FavoritesValidator`, `PlayerContextResolver`, `FavoritesProperties`, and `CdcReader`. Port
 business logic from `DefaultFavoriteWagerService`, `DefaultFavoriteWagerConverter`, and
 `DefaultFavoriteWagerValidator`. Remove all JMX, Guava, Joda Time, Hibernate Validator, and
 `WagerMinifier.expand()` usage. Replace `@ManagedAttribute` properties with
-`@ConfigurationProperties(prefix="favourites")`.
+`@ConfigurationProperties(prefix="favorites")`.
 
 ### Why this is a unit
 The service layer encapsulates all business rules. It sits between the DAO layer (SP3) and the
@@ -358,22 +358,22 @@ test coverage before any HTTP code is written.
 ### Key classes / files to create
 
 ```
-czh-favorites-app/src/main/java/cz/bsl/czh/favourites/
+czh-favorites-app/src/main/java/cz/bsl/czh/favorites/
   service/
-    FavouritesService.java           # interface: 5 wager ops + 5 group ops
-    DefaultFavouritesService.java    # @Service, uses FavouritesGroupDao + FavouritesWagerDao
-    FavouritesConverter.java         # DTO <-> domain; Joda->java.time.Instant; Guava->Java streams
-    FavouritesValidator.java         # plain-Java validation; throws IllegalArgumentException with message
+    FavoritesService.java           # interface: 5 wager ops + 5 group ops
+    DefaultFavoritesService.java    # @Service, uses FavoritesGroupDao + FavoritesWagerDao
+    FavoritesConverter.java         # DTO <-> domain; Joda->java.time.Instant; Guava->Java streams
+    FavoritesValidator.java         # plain-Java validation; throws IllegalArgumentException with message
   config/
-    FavouritesProperties.java        # @ConfigurationProperties(prefix="favourites") — 8 fields
+    FavoritesProperties.java        # @ConfigurationProperties(prefix="favorites") — 8 fields
   server/
     PlayerContextResolver.java       # extracts playerId from X-Player-Id; HTTP 400 if missing/blank
     CdcReader.java                   # reads /run/mx/cdc; returns int; returns 0 when file absent
 
-czh-favorites-app/src/test/java/cz/bsl/czh/favourites/service/
-  DefaultFavouritesServiceTest.java  # mock DAO; test all 10 operations
-  FavouritesConverterTest.java       # port of DefaultCZHFavoriteWagerConverterTest
-  FavouritesValidatorTest.java       # port of WagerValidatorImplTest; all validation rules
+czh-favorites-app/src/test/java/cz/bsl/czh/favorites/service/
+  DefaultFavoritesServiceTest.java  # mock DAO; test all 10 operations
+  FavoritesConverterTest.java       # port of DefaultCZHFavoriteWagerConverterTest
+  FavoritesValidatorTest.java       # port of WagerValidatorImplTest; all validation rules
   CdcReaderTest.java                 # file present -> integer; file absent -> 0
 ```
 
@@ -394,23 +394,23 @@ SP2 (DTO types), SP3 (DAO interfaces).
 >   time from java.time.Instant.now(); CDC from /run/mx/cdc)
 >
 > Create a detailed implementation plan for SP5: Service Layer.
-> - `FavouritesService` interface: 5 wager operations (create, get, update, delete, list) + 5 group operations
-> - `DefaultFavouritesService`: remove JMX, Guava, Joda Time; use @ConfigurationProperties, Java streams,
+> - `FavoritesService` interface: 5 wager operations (create, get, update, delete, list) + 5 group operations
+> - `DefaultFavoritesService`: remove JMX, Guava, Joda Time; use @ConfigurationProperties, Java streams,
 >   java.time.Instant; drop WagerMinifier.expand() — caller sends complete data
-> - `FavouritesConverter`: replace Joda with java.time.Instant; replace Guava with standard Java
-> - `FavouritesValidator`: port all validation rules as plain Java; no Hibernate Validator;
+> - `FavoritesConverter`: replace Joda with java.time.Instant; replace Guava with standard Java
+> - `FavoritesValidator`: port all validation rules as plain Java; no Hibernate Validator;
 >   throws IllegalArgumentException with human-readable message
-> - `FavouritesProperties`: 8 @ConfigurationProperties fields from migration doc
+> - `FavoritesProperties`: 8 @ConfigurationProperties fields from migration doc
 > - `PlayerContextResolver`: extracts X-Player-Id from HttpServletRequest; returns HTTP 400 if missing/blank
 > - `CdcReader`: reads /run/mx/cdc as ASCII integer; returns 0 when file absent (test environments)
 > - JUnit 5 unit tests for every class with business logic
-> Package: `cz.bsl.favourites.service`, `.config`, `.server`
+> Package: `cz.bsl.favorites.service`, `.config`, `.server`
 
 ---
-## SP6: Favourites Controller
+## SP6: Favorites Controller
 
 ### Scope
-Implement `FavouritesController` — the single `@RestController` at `/favourites` — with all 10
+Implement `FavoritesController` — the single `@RestController` at `/favorites` — with all 10
 endpoint methods (5 wager, 5 group). Wire `PlayerContextResolver` for header extraction. Return
 HTTP 400 for validation errors and HTTP 404 when a wager/group is not found or belongs to another
 player. Write full Jamcrest integration tests using `AbstractRestTest` for every endpoint.
@@ -432,22 +432,22 @@ the same service, validator, and error-handling path, so they form one cohesive 
 ### Key classes / files to create
 
 ```
-czh-favorites-app/src/main/java/cz/bsl/czh/favourites/
+czh-favorites-app/src/main/java/cz/bsl/czh/favorites/
   controller/
-    FavouritesController.java        # @RestController @RequestMapping("/favourites")
+    FavoritesController.java        # @RestController @RequestMapping("/favorites")
                                      # wager: POST /wagers, GET /wagers/{id}, PUT /wagers/{id},
                                      #   DELETE /wagers/{id}, GET /wagers?group=&game-names=
                                      # group: POST /groups, GET /groups/{n}, PUT /groups/{n},
                                      #   DELETE /groups/{n}, GET /groups
-    FavouritesErrorHandler.java      # @ControllerAdvice: IllegalArgumentException->400,
+    FavoritesErrorHandler.java      # @ControllerAdvice: IllegalArgumentException->400,
                                      #   NoSuchElementException->404
 
-czh-favorites-app/src/test/java/cz/bsl/czh/favourites/controller/
-  FavouritesWagerControllerTest.java # extends AbstractRestTest; Jamcrest for 5 wager endpoints
-  FavouritesGroupControllerTest.java # extends AbstractRestTest; Jamcrest for 5 group endpoints
-  FavouritesValidationTest.java      # extends AbstractRestTest; invalid id, missing header, limits exceeded
+czh-favorites-app/src/test/java/cz/bsl/czh/favorites/controller/
+  FavoritesWagerControllerTest.java # extends AbstractRestTest; Jamcrest for 5 wager endpoints
+  FavoritesGroupControllerTest.java # extends AbstractRestTest; Jamcrest for 5 group endpoints
+  FavoritesValidationTest.java      # extends AbstractRestTest; invalid id, missing header, limits exceeded
 
-czh-favorites-app/src/test/resources/favourites/
+czh-favorites-app/src/test/resources/favorites/
   wager/create.req.js
   wager/create.resp.js
   wager/get.resp.js
@@ -461,7 +461,7 @@ czh-favorites-app/src/test/resources/favourites/
 ```
 
 ### Dependencies on other sub-plans
-SP4 (AbstractRestTest), SP5 (FavouritesService, PlayerContextResolver, FavouritesValidator).
+SP4 (AbstractRestTest), SP5 (FavoritesService, PlayerContextResolver, FavoritesValidator).
 
 ### Suggested detailed-plan prompt
 
@@ -473,27 +473,27 @@ SP4 (AbstractRestTest), SP5 (FavouritesService, PlayerContextResolver, Favourite
 > - `.planning/java25-spring-boot-migration.md` (all endpoint tables; validation rules; HTTP 400/404 rules;
 >   test classes to write; WagerMinifier.expand() dropped — caller sends complete data)
 >
-> Create a detailed implementation plan for SP6: Favourites Controller.
-> - `FavouritesController` at `/favourites`; all 10 endpoint methods from the migration doc tables
+> Create a detailed implementation plan for SP6: Favorites Controller.
+> - `FavoritesController` at `/favorites`; all 10 endpoint methods from the migration doc tables
 > - Use `PlayerContextResolver` to extract `X-Player-Id` from every request; return 400 if missing/blank
-> - `FavouritesErrorHandler` @ControllerAdvice: `IllegalArgumentException`->400, `NoSuchElementException`->404
-> - Write `.req.js`/`.resp.js` fixtures under `src/test/resources/favourites/` for every endpoint
+> - `FavoritesErrorHandler` @ControllerAdvice: `IllegalArgumentException`->400, `NoSuchElementException`->404
+> - Write `.req.js`/`.resp.js` fixtures under `src/test/resources/favorites/` for every endpoint
 >   (write from scratch based on DTO fields — no surviving GIS test resources with wager JSON)
-> - `FavouritesWagerControllerTest` + `FavouritesGroupControllerTest` + `FavouritesValidationTest`
+> - `FavoritesWagerControllerTest` + `FavoritesGroupControllerTest` + `FavoritesValidationTest`
 >   extending `AbstractRestTest`; all Jamcrest assertions must pass; no `.resp.js` missing
-> Package: `cz.bsl.favourites.controller`
+> Package: `cz.bsl.favorites.controller`
 
 ---
 ## SP7: Admin API
 
 ### Scope
-Port `AdminFavoriteWagerResource` to a Spring MVC `@RestController` at `/admin/favourites`.
+Port `AdminFavoriteWagerResource` to a Spring MVC `@RestController` at `/admin/favorites`.
 The admin API provides read-only access to a player's wagers and groups by passing `playerId` as
 a path parameter (bypassing the `X-Player-Id` player header — document the security boundary).
 No mutation operations: read and list only.
 
 ### Why this is a unit
-The admin endpoints share the same `FavouritesService` (SP5) and `FavouritesConverter` as the
+The admin endpoints share the same `FavoritesService` (SP5) and `FavoritesConverter` as the
 player controller but have a different auth path and a different HTTP base path. Keeping them
 separate keeps each SP's scope small and avoids bloating SP6.
 
@@ -502,24 +502,24 @@ separate keeps each SP's scope small and avoids bloating SP6.
 | File | Purpose |
 |------|---------|
 | `references/gis/components/gis/gis-site/src/main/java/com/gtech/gis/site/resources/AdminFavoriteWagerResource.java` | Legacy admin resource — 3 GET endpoints to port |
-| `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/controller/FavouritesController.java` | Player controller (SP6) — align error handling style |
+| `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/controller/FavoritesController.java` | Player controller (SP6) — align error handling style |
 | `.planning/java25-spring-boot-migration.md` | Auth header conventions |
 
 ### Key classes / files to create
 
 ```
-czh-favorites-app/src/main/java/cz/bsl/czh/favourites/
+czh-favorites-app/src/main/java/cz/bsl/czh/favorites/
   controller/
-    AdminFavouritesController.java   # @RestController @RequestMapping("/admin/favourites")
-                                     # GET /admin/favourites/players/{playerId}/wagers
-                                     # GET /admin/favourites/players/{playerId}/wagers/{id}
-                                     # GET /admin/favourites/players/{playerId}/groups
-                                     # GET /admin/favourites/players/{playerId}/groups/{groupNumber}
+    AdminFavoritesController.java   # @RestController @RequestMapping("/admin/favorites")
+                                     # GET /admin/favorites/players/{playerId}/wagers
+                                     # GET /admin/favorites/players/{playerId}/wagers/{id}
+                                     # GET /admin/favorites/players/{playerId}/groups
+                                     # GET /admin/favorites/players/{playerId}/groups/{groupNumber}
 
-czh-favorites-app/src/test/java/cz/bsl/czh/favourites/controller/
-  AdminFavouritesControllerTest.java # extends AbstractRestTest; Jamcrest for 4 admin read endpoints
+czh-favorites-app/src/test/java/cz/bsl/czh/favorites/controller/
+  AdminFavoritesControllerTest.java # extends AbstractRestTest; Jamcrest for 4 admin read endpoints
 
-czh-favorites-app/src/test/resources/favourites/admin/
+czh-favorites-app/src/test/resources/favorites/admin/
   wagers.resp.js
   wager-get.resp.js
   groups.resp.js
@@ -527,30 +527,30 @@ czh-favorites-app/src/test/resources/favourites/admin/
 ```
 
 ### Dependencies on other sub-plans
-SP4 (AbstractRestTest), SP5 (FavouritesService), SP6 (FavouritesErrorHandler reused).
+SP4 (AbstractRestTest), SP5 (FavoritesService), SP6 (FavoritesErrorHandler reused).
 
 ### Suggested detailed-plan prompt
 
 > Read the following before planning:
 > - `references/gis/components/gis/gis-site/src/main/java/com/gtech/gis/site/resources/AdminFavoriteWagerResource.java`
 >   (note @Path("/admin") base; port only the GET read endpoints; no mutation endpoints needed)
-> - The completed `FavouritesController.java` from SP6 (error-handling and service-call style to mirror)
+> - The completed `FavoritesController.java` from SP6 (error-handling and service-call style to mirror)
 > - `.planning/java25-spring-boot-migration.md` (auth header conventions)
 >
 > Create a detailed implementation plan for SP7: Admin API.
-> - `AdminFavouritesController` at `/admin/favourites`; read-only: list wagers, get wager, list groups, get group
+> - `AdminFavoritesController` at `/admin/favorites`; read-only: list wagers, get wager, list groups, get group
 > - `playerId` as path parameter (admin bypasses player header); document the security boundary in Javadoc
-> - Reuse `FavouritesErrorHandler` from SP6 (no new error handling needed)
+> - Reuse `FavoritesErrorHandler` from SP6 (no new error handling needed)
 > - Jamcrest tests for all 4 endpoints extending `AbstractRestTest`
-> Package: `cz.bsl.favourites.controller`
+> Package: `cz.bsl.favorites.controller`
 
 ---
 
 ## SP8: Prometheus Metrics
 
 ### Scope
-Wire Prometheus counters into `DefaultFavouritesService` via a `FavouritesMetrics` bean: per-operation
-`favourites.wager.*` and `favourites.group.*` counters for requests, successes, and failures.
+Wire Prometheus counters into `DefaultFavoritesService` via a `FavoritesMetrics` bean: per-operation
+`favorites.wager.*` and `favorites.group.*` counters for requests, successes, and failures.
 Confirm the `/actuator/prometheus` endpoint exposes all counters when the application starts.
 
 ### Why this is a unit
@@ -569,14 +569,14 @@ change minimal and reviewable on its own.
 ### Key classes / files to create
 
 ```
-czh-favorites-app/src/main/java/cz/bsl/czh/favourites/
+czh-favorites-app/src/main/java/cz/bsl/czh/favorites/
   metrics/
-    FavouritesMetrics.java           # MeterRegistry wrappers:
-                                     #   favourites.wager.requests / .success / .failures
-                                     #   favourites.group.requests / .success / .failures
+    FavoritesMetrics.java           # MeterRegistry wrappers:
+                                     #   favorites.wager.requests / .success / .failures
+                                     #   favorites.group.requests / .success / .failures
 
-czh-favorites-app/src/test/java/cz/bsl/czh/favourites/metrics/
-  FavouritesMetricsTest.java         # verify counters increment on service calls
+czh-favorites-app/src/test/java/cz/bsl/czh/favorites/metrics/
+  FavoritesMetricsTest.java         # verify counters increment on service calls
 ```
 
 ### Dependencies on other sub-plans
@@ -590,14 +590,14 @@ SP6, SP7 (service layer must be stable before wiring metric calls).
 > - `.requirements/design/hld.md` ("limit to core metrics; health via prometheus")
 >
 > Create a detailed implementation plan for SP8: Prometheus Metrics.
-> - `FavouritesMetrics` bean: inject `MeterRegistry`; expose counters
->   `favourites.wager.requests`, `favourites.wager.success`, `favourites.wager.failures`,
->   `favourites.group.requests`, `favourites.group.success`, `favourites.group.failures`
-> - Wire `FavouritesMetrics` into `DefaultFavouritesService` via constructor injection;
+> - `FavoritesMetrics` bean: inject `MeterRegistry`; expose counters
+>   `favorites.wager.requests`, `favorites.wager.success`, `favorites.wager.failures`,
+>   `favorites.group.requests`, `favorites.group.success`, `favorites.group.failures`
+> - Wire `FavoritesMetrics` into `DefaultFavoritesService` via constructor injection;
 >   increment request on entry, success on normal return, failures on exception
 > - Confirm `/actuator/prometheus` exposes the counters (integration test or manual curl)
 > - JUnit 5 test: call service methods through the mock, verify counter increments
-> Package: `cz.bsl.favourites.metrics`
+> Package: `cz.bsl.favorites.metrics`
 
 ---
 
@@ -608,7 +608,7 @@ Create the project-specific deployment artifacts: `czh-favorites-app-rpm` (Sprin
 RPM installed to `/opt/czh-favorites/`) and `czh-favorites-db-rpm` (delta scripts RPM). Add
 GitHub Actions YAML CI pipelines (`build.yml`, `release.yml`). Write `bin/start.sh`,
 `bin/stop.sh`, `bin/status.sh`, and the systemd unit file. This is the project-specific instance
-of the deployment guide with `czh-favourites` substituted for the generic `<app>` placeholder.
+of the deployment guide with `czh-favorites` substituted for the generic `<app>` placeholder.
 
 ### Why this is a unit
 Deployment is orthogonal to feature development and can only be completed once the application jar
@@ -677,12 +677,12 @@ SP8 (application must be complete before deployment packaging).
 ### Scope
 Implement the operator Vision GUI — a single-page dark-theme dashboard served from
 `czh-favorites-app` at `/gui/` on the management port. Same Bootstrap 5 Darkly look and feel as
-`/java/czh/czh-money/money-app/src/main/resources/gui/`. Three tabs specific to czh-favourites:
+`/java/czh/czh-money/money-app/src/main/resources/gui/`. Three tabs specific to czh-favorites:
 **Server** (health status, uptime, JVM heap — identical in structure to czh-money's `server.js`),
-**Operations** (per-operation TPM bar graphs driven dynamically from `favourites_wager_*` and
-`favourites_group_*` Prometheus counters added in SP8), and **Player Lookup** (enter a `playerId`,
+**Operations** (per-operation TPM bar graphs driven dynamically from `favorites_wager_*` and
+`favorites_group_*` Prometheus counters added in SP8), and **Player Lookup** (enter a `playerId`,
 call the admin API from SP7 to show the player's wager count, group count, and a brief list of
-their favourites). No server-side template engine — pure static HTML + vanilla JS served from
+their favorites). No server-side template engine — pure static HTML + vanilla JS served from
 `src/main/resources/gui/`.
 
 ### Why this is a unit
@@ -703,15 +703,15 @@ one SP avoids fragmenting the front-end work across multiple plans.
 | `references/czh-money/money-app/src/main/resources/gui/js/chart.js` | Chart helpers — copy verbatim |
 | `references/czh-money/money-app/src/main/resources/gui/css/gui.css` | Dark theme CSS — copy verbatim |
 | `references/czh-money/money-app/src/main/resources/gui/js/snapshots/server.js` | Server tab implementation — copy and retitle |
-| `references/czh-money/money-app/src/main/resources/gui/js/snapshots/operations.js` | Operations tab — adapt metric name from `money_operation_total` to `favourites_wager_total` / `favourites_group_total` |
+| `references/czh-money/money-app/src/main/resources/gui/js/snapshots/operations.js` | Operations tab — adapt metric name from `money_operation_total` to `favorites_wager_total` / `favorites_group_total` |
 | `references/czh-money/money-app/src/main/resources/gui/js/snapshots/metrics.js` | Metrics tab — adapt or replace with Player Lookup tab |
-| `.planning/java25-spring-boot-migration.md` | Sanename; admin API paths (/admin/favourites/players/{id}/...) |
+| `.planning/java25-spring-boot-migration.md` | Sanename; admin API paths (/admin/favorites/players/{id}/...) |
 
 ### Key classes / files to create
 
 ```
 czh-favorites-app/src/main/resources/gui/
-  index.html                             # retitled "czh-favourites Vision 👀"; same 3-tab structure
+  index.html                             # retitled "czh-favorites Vision 👀"; same 3-tab structure
   favicon.png                            # copy from czh-money reference
   css/
     gui.css                              # copy verbatim from czh-money reference
@@ -725,14 +725,14 @@ czh-favorites-app/src/main/resources/gui/
       server.js                          # copy from czh-money; retitle; no logic changes needed
       operations.js                      # adapt from czh-money operations.js:
                                          #   change metric name from money_operation_total
-                                         #   to favourites_wager_total and favourites_group_total;
+                                         #   to favorites_wager_total and favorites_group_total;
                                          #   ops discovered dynamically from labels (no hardcoding)
       player-lookup.js                   # NEW: text input for playerId; on submit calls
-                                         #   GET /admin/favourites/players/{id}/wagers
-                                         #   GET /admin/favourites/players/{id}/groups
+                                         #   GET /admin/favorites/players/{id}/wagers
+                                         #   GET /admin/favorites/players/{id}/groups
                                          #   renders wager count, group count, wager name list
 
-czh-favorites-app/src/main/java/cz/bsl/czh/favourites/
+czh-favorites-app/src/main/java/cz/bsl/czh/favorites/
   config/
     GuiWebConfig.java                    # implements WebMvcConfigurer; maps /gui/** to classpath:/gui/
 ```
@@ -742,8 +742,8 @@ czh-favorites-app/src/main/java/cz/bsl/czh/favourites/
 | Tab             | Data source                       | Key display elements                                                                 |
 |-----------------|-----------------------------------|--------------------------------------------------------------------------------------|
 | Server          | `/actuator/health`, `/actuator/prometheus` | UP/DOWN badge, db status, uptime, JVM heap bar (used/committed/max)       |
-| Operations      | `/actuator/prometheus`            | Per-op TPM bar charts, one per op label from `favourites_wager_total` / `favourites_group_total`; ok=green, failure=red; lazy — shows "no operations yet" until traffic |
-| Player Lookup   | `/admin/favourites/players/{id}/wagers`, `/admin/favourites/players/{id}/groups` | playerId input field; on submit: wager count, group count, table of wager names + game names |
+| Operations      | `/actuator/prometheus`            | Per-op TPM bar charts, one per op label from `favorites_wager_total` / `favorites_group_total`; ok=green, failure=red; lazy — shows "no operations yet" until traffic |
+| Player Lookup   | `/admin/favorites/players/{id}/wagers`, `/admin/favorites/players/{id}/groups` | playerId input field; on submit: wager count, group count, table of wager names + game names |
 
 ### Dependencies on other sub-plans
 SP7 (admin API for Player Lookup tab), SP8 (Prometheus counters for Operations tab). SP10 can run
@@ -758,25 +758,25 @@ in parallel with SP9 (Deployment) once SP7 and SP8 are complete.
 > - `references/czh-money/money-app/src/main/resources/gui/js/snapshots/server.js`
 > - `references/czh-money/money-app/src/main/resources/gui/js/snapshots/operations.js`
 > - `references/czh-money/money-app/src/main/resources/gui/css/gui.css`
-> - `.planning/java25-spring-boot-migration.md` (sanename=`favourites`; admin API paths; SP8 metric names)
+> - `.planning/java25-spring-boot-migration.md` (sanename=`favorites`; admin API paths; SP8 metric names)
 >
 > Create a detailed implementation plan for SP10: Vision GUI.
 > - Copy `api.js`, `app.js`, `clock.js`, `prom.js`, `chart.js`, `gui.css`, `favicon.png` verbatim from
 >   `references/czh-money/money-app/src/main/resources/gui/` — no changes to shared infrastructure
-> - Copy `server.js` verbatim; only change the title string from "czh-money" to "czh-favourites"
-> - Adapt `operations.js`: replace metric name `money_operation_total` with `favourites_wager_total`
->   for wager ops and `favourites_group_total` for group ops; keep dynamic label discovery (no
+> - Copy `server.js` verbatim; only change the title string from "czh-money" to "czh-favorites"
+> - Adapt `operations.js`: replace metric name `money_operation_total` with `favorites_wager_total`
+>   for wager ops and `favorites_group_total` for group ops; keep dynamic label discovery (no
 >   hardcoded op list); ops from both metrics appear as separate graph cards
 > - Write `player-lookup.js`: input box for playerId, submit button, calls admin API endpoints from SP7
->   (`/admin/favourites/players/{id}/wagers` and `/admin/favourites/players/{id}/groups`), renders a
+>   (`/admin/favorites/players/{id}/wagers` and `/admin/favorites/players/{id}/groups`), renders a
 >   count summary and a scrollable table of wager name + game name rows; handles 404 (player not found)
 >   and network errors gracefully
-> - Write `index.html`: same structure as czh-money; title "czh-favourites Vision 👀"; register three
+> - Write `index.html`: same structure as czh-money; title "czh-favorites Vision 👀"; register three
 >   tabs: 'server' (Server), 'operations' (Operations), 'player' (Player Lookup)
 > - Write `GuiWebConfig.java`: `addResourceHandlers` mapping `/gui/**` to `classpath:/gui/`
 >   so the static files are served by Spring MVC
 > - Smoke test: start the application and confirm `GET /gui/index.html` returns 200
-> Package: `cz.bsl.favourites.config`
+> Package: `cz.bsl.favorites.config`
 
 ---
 ## Progress Tracking

@@ -1,84 +1,86 @@
-# Routing Map — czh-favourites
+# Routing Map — czh-favorites
 
-Updated after SP9 (Deployment). Grep anchor for all files: `favourites`.
 
 ---
 
 ## Section 1 — Feature → sanename table
 
-| Feature                  | Sanename               | Module              | Package                               | File                                                                                                          |
-|--------------------------|------------------------|---------------------|---------------------------------------|---------------------------------------------------------------------------------------------------------------|
-| Application entry point  | FavouritesApplication  | czh-favorites-app   | cz.bsl.favourites                     | czh-favorites-app/src/main/java/cz/bsl/favourites/FavouritesApplication.java                                 |
-| Config properties        | FavouritesProperties   | czh-favorites-app   | cz.bsl.favourites.config              | czh-favorites-app/src/main/java/cz/bsl/favourites/config/FavouritesProperties.java                           |
-| DataSource (DB2/H2)      | DataSourceConfig       | czh-favorites-app   | cz.bsl.favourites.config              | czh-favorites-app/src/main/java/cz/bsl/favourites/config/DataSourceConfig.java                               |
-| Favourite wager API DTO  | FavouriteWagerDto      | czh-favorites-api   | cz.bsl.czh.favourites.api             | czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteWagerDto.java                             |
-| Favourite group API DTO  | FavouriteGroupDto      | czh-favorites-api   | cz.bsl.czh.favourites.api             | czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteGroupDto.java                             |
-| Wager sub-object (JSON)  | WagerDto               | czh-favorites-api   | cz.bsl.czh.favourites.api             | czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/WagerDto.java                                      |
-| Wager list response      | FavouriteWagerPageDto  | czh-favorites-api   | cz.bsl.czh.favourites.api             | czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteWagerPageDto.java                         |
-| Group list response      | FavouriteGroupPageDto  | czh-favorites-api   | cz.bsl.czh.favourites.api             | czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteGroupPageDto.java                         |
-| Test DB schema config    | TestDatabaseConfig     | czh-favorites-app   | cz.bsl.czh.favourites.config (test)   | czh-favorites-app/src/test/java/cz/bsl/czh/favourites/config/TestDatabaseConfig.java                         |
-| JSON test utils          | JamcrestUtils          | czh-favorites-app   | cz.bsl.czh.favourites.test            | czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/JamcrestUtils.java                                |
-| Base REST integration    | AbstractRestTest       | czh-favorites-app   | cz.bsl.czh.favourites.test            | czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/AbstractRestTest.java                             |
-| Context smoke test       | FavouritesRestSmokeTest| czh-favorites-app   | cz.bsl.czh.favourites.test            | czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/FavouritesRestSmokeTest.java                      |
-| Service interface        | FavouritesService      | czh-favorites-app   | cz.bsl.czh.favourites.service         | czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesService.java                         |
-| Service implementation   | DefaultFavouritesService | czh-favorites-app | cz.bsl.czh.favourites.service         | czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/DefaultFavouritesService.java                  |
-| DTO/record converter     | FavouritesConverter    | czh-favorites-app   | cz.bsl.czh.favourites.service         | czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesConverter.java                       |
-| Input validation         | FavouritesValidator    | czh-favorites-app   | cz.bsl.czh.favourites.service         | czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesValidator.java                       |
-| Player header extraction | PlayerContextResolver  | czh-favorites-app   | cz.bsl.czh.favourites.server          | czh-favorites-app/src/main/java/cz/bsl/czh/favourites/server/PlayerContextResolver.java                      |
-| CDC draw counter reader  | CdcReader              | czh-favorites-app   | cz.bsl.czh.favourites.server          | czh-favorites-app/src/main/java/cz/bsl/czh/favourites/server/CdcReader.java                                  |
-| REST error handler       | FavouritesErrorHandler | czh-favorites-app   | cz.bsl.favourites.web                 | czh-favorites-app/src/main/java/cz/bsl/favourites/web/FavouritesErrorHandler.java                            |
-| Player wager/group REST  | FavouritesController   | czh-favorites-app   | cz.bsl.favourites.web                 | czh-favorites-app/src/main/java/cz/bsl/favourites/web/FavouritesController.java                              |
-| Wager controller tests   | FavouritesWagerControllerTest | czh-favorites-app | cz.bsl.favourites.web (test)       | czh-favorites-app/src/test/java/cz/bsl/favourites/web/FavouritesWagerControllerTest.java                     |
-| Group controller tests   | FavouritesGroupControllerTest | czh-favorites-app | cz.bsl.favourites.web (test)       | czh-favorites-app/src/test/java/cz/bsl/favourites/web/FavouritesGroupControllerTest.java                     |
-| Validation error tests   | FavouritesValidationTest | czh-favorites-app | cz.bsl.favourites.web (test)          | czh-favorites-app/src/test/java/cz/bsl/favourites/web/FavouritesValidationTest.java                          |
-| Error handler unit test  | FavouritesErrorHandlerTest | czh-favorites-app | cz.bsl.favourites.web (test)        | czh-favorites-app/src/test/java/cz/bsl/favourites/web/FavouritesErrorHandlerTest.java                        |
-| Admin read-only REST     | AdminFavouritesController  | czh-favorites-app   | cz.bsl.favourites.web               | czh-favorites-app/src/main/java/cz/bsl/favourites/web/AdminFavouritesController.java                         |
-| Admin controller tests   | AdminFavouritesControllerTest | czh-favorites-app | cz.bsl.favourites.web (test)      | czh-favorites-app/src/test/java/cz/bsl/favourites/web/AdminFavouritesControllerTest.java                     |
-| Prometheus counters      | FavouritesMetrics          | czh-favorites-app   | cz.bsl.czh.favourites.metrics     | czh-favorites-app/src/main/java/cz/bsl/czh/favourites/metrics/FavouritesMetrics.java                         |
-| Metrics unit tests       | FavouritesMetricsTest      | czh-favorites-app   | cz.bsl.czh.favourites.metrics (test) | czh-favorites-app/src/test/java/cz/bsl/czh/favourites/metrics/FavouritesMetricsTest.java                  |
-| GUI static resource map  | GuiResourceConfig          | czh-favorites-app   | cz.bsl.favourites.config            | czh-favorites-app/src/main/java/cz/bsl/favourites/config/GuiResourceConfig.java                              |
-| GUI context-root rewrite | VisionBaseContextFilter    | czh-favorites-app   | cz.bsl.favourites.config            | czh-favorites-app/src/main/java/cz/bsl/favourites/config/VisionBaseContextFilter.java                         |
-| GUI filter unit tests    | VisionBaseTest             | czh-favorites-app   | cz.bsl.czh.favourites.test.it (test)| czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/it/VisionBaseTest.java                            |
-| Vision nginx harness     | vision-test.sh             | (bash)              | (test)                              | test/vision-test.sh                                                                                          |
-| Vision harness booter    | VisionHarnessMain          | czh-favorites-app   | cz.bsl.czh.favourites.test (test)   | czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/VisionHarnessMain.java                            |
-| Vision nginx fixture     | vision-nginx               | (nginx)             | (test fixture)                      | test/fixtures/vision-nginx/nginx.conf, test/fixtures/vision-nginx/conf.d/vision-demo.conf                    |
-| App RPM packaging        | czh-favorites-app-rpm      | czh-favorites-app-rpm | (deployment; no Java)             | czh-favorites-app-rpm/pom.xml                                                                                 |
-| DB delta RPM packaging   | czh-favorites-db-rpm       | czh-favorites-db-rpm  | (deployment; no Java)             | czh-favorites-db-rpm/pom.xml                                                                                  |
-| GitHub Actions CI        | build.yml                  | (CI)                | (GitHub Actions YAML)               | .github/workflows/build.yml                                                                                   |
+| Feature                  | Sanename                     | Module                | Package                             | File                                                                                      |
+|--------------------------|------------------------------|-----------------------|-------------------------------------|-------------------------------------------------------------------------------------------|
+| Application entry point  | FavoritesApplication         | czh-favorites-app     | cz.bsl.favorites                    | czh-favorites-app/src/main/java/cz/bsl/favorites/FavoritesApplication.java                |
+| Config properties        | FavoritesProperties          | czh-favorites-app     | cz.bsl.favorites.config             | czh-favorites-app/src/main/java/cz/bsl/favorites/config/FavoritesProperties.java          |
+| DataSource (DB2/H2)      | DataSourceConfig             | czh-favorites-app     | cz.bsl.favorites.config             | czh-favorites-app/src/main/java/cz/bsl/favorites/config/DataSourceConfig.java             |
+| Favorite wager API DTO   | FavoriteWagerDto             | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteWagerDto.java            |
+| Favorite group API DTO   | FavoriteGroupDto             | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteGroupDto.java            |
+| Wager sub-object (JSON)  | WagerDto                     | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/WagerDto.java                    |
+| Wager list response      | FavoriteWagerPageDto         | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteWagerPageDto.java        |
+| Group list response      | FavoriteGroupPageDto         | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteGroupPageDto.java        |
+| Test DB schema config    | TestDatabaseConfig           | czh-favorites-app     | cz.bsl.czh.favorites.config (test)  | czh-favorites-app/src/test/java/cz/bsl/czh/favorites/config/TestDatabaseConfig.java       |
+| JSON test utils          | JamcrestUtils                | czh-favorites-app     | cz.bsl.czh.favorites.test           | czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/JamcrestUtils.java              |
+| Base REST integration    | AbstractRestTest             | czh-favorites-app     | cz.bsl.czh.favorites.test           | czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/AbstractRestTest.java           |
+| Context smoke test       | FavoritesRestSmokeTest       | czh-favorites-app     | cz.bsl.czh.favorites.test           | czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/FavoritesRestSmokeTest.java     |
+| Service interface        | FavoritesService             | czh-favorites-app     | cz.bsl.czh.favorites.service        | czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesService.java        |
+| Service implementation   | DefaultFavoritesService      | czh-favorites-app     | cz.bsl.czh.favorites.service        | czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/DefaultFavoritesService.java |
+| DTO/record converter     | FavoritesConverter           | czh-favorites-app     | cz.bsl.czh.favorites.service        | czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesConverter.java      |
+| Input validation         | FavoritesValidator           | czh-favorites-app     | cz.bsl.czh.favorites.service        | czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesValidator.java      |
+| Player header extraction | PlayerContextResolver        | czh-favorites-app     | cz.bsl.czh.favorites.server         | czh-favorites-app/src/main/java/cz/bsl/czh/favorites/server/PlayerContextResolver.java    |
+| CDC draw counter reader  | CdcReader                    | czh-favorites-app     | cz.bsl.czh.favorites.server         | czh-favorites-app/src/main/java/cz/bsl/czh/favorites/server/CdcReader.java                |
+| REST error handler       | FavoritesErrorHandler        | czh-favorites-app     | cz.bsl.favorites.web                | czh-favorites-app/src/main/java/cz/bsl/favorites/web/FavoritesErrorHandler.java           |
+| Player wager/group REST  | FavoritesController          | czh-favorites-app     | cz.bsl.favorites.web                | czh-favorites-app/src/main/java/cz/bsl/favorites/web/FavoritesController.java             |
+| Wager controller tests   | FavoritesWagerControllerTest | czh-favorites-app     | cz.bsl.favorites.web (test)         | czh-favorites-app/src/test/java/cz/bsl/favorites/web/FavoritesWagerControllerTest.java    |
+| Group controller tests   | FavoritesGroupControllerTest | czh-favorites-app     | cz.bsl.favorites.web (test)         | czh-favorites-app/src/test/java/cz/bsl/favorites/web/FavoritesGroupControllerTest.java    |
+| Validation error tests   | FavoritesValidationTest      | czh-favorites-app     | cz.bsl.favorites.web (test)         | czh-favorites-app/src/test/java/cz/bsl/favorites/web/FavoritesValidationTest.java         |
+| Error handler unit test  | FavoritesErrorHandlerTest    | czh-favorites-app     | cz.bsl.favorites.web (test)         | czh-favorites-app/src/test/java/cz/bsl/favorites/web/FavoritesErrorHandlerTest.java       |
+| Admin read-only REST     | AdminFavoritesController     | czh-favorites-app     | cz.bsl.favorites.web                | czh-favorites-app/src/main/java/cz/bsl/favorites/web/AdminFavoritesController.java        |
+| Admin controller tests   | AdminFavoritesControllerTest | czh-favorites-app     | cz.bsl.favorites.web (test)         | czh-favorites-app/src/test/java/cz/bsl/favorites/web/AdminFavoritesControllerTest.java    |
+| Prometheus counters      | FavoritesMetrics             | czh-favorites-app     | cz.bsl.czh.favorites.metrics        | czh-favorites-app/src/main/java/cz/bsl/czh/favorites/metrics/FavoritesMetrics.java        |
+| Metrics unit tests       | FavoritesMetricsTest         | czh-favorites-app     | cz.bsl.czh.favorites.metrics (test) | czh-favorites-app/src/test/java/cz/bsl/czh/favorites/metrics/FavoritesMetricsTest.java    |
+| GUI static resource map  | GuiResourceConfig            | czh-favorites-app     | cz.bsl.favorites.config             | czh-favorites-app/src/main/java/cz/bsl/favorites/config/GuiResourceConfig.java            |
+| GUI context-root rewrite | VisionBaseContextFilter      | czh-favorites-app     | cz.bsl.favorites.config             | czh-favorites-app/src/main/java/cz/bsl/favorites/config/VisionBaseContextFilter.java      |
+| GUI filter unit tests    | VisionBaseTest               | czh-favorites-app     | cz.bsl.czh.favorites.test.it (test) | czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/it/VisionBaseTest.java          |
+| Vision nginx harness     | vision-test.sh               | (bash)                | (test)                              | test/vision-test.sh                                                                       |
+| Vision harness booter    | VisionHarnessMain            | czh-favorites-app     | cz.bsl.czh.favorites.test (test)    | czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/VisionHarnessMain.java          |
+| Vision nginx fixture     | vision-nginx                 | (nginx)               | (test fixture)                      | test/fixtures/vision-nginx/nginx.conf, test/fixtures/vision-nginx/conf.d/vision-demo.conf |
+| App RPM packaging        | czh-favorites-app-rpm        | czh-favorites-app-rpm | (deployment; no Java)               | czh-favorites-app-rpm/pom.xml                                                             |
+| DB delta RPM packaging   | czh-favorites-db-rpm         | czh-favorites-db-rpm  | (deployment; no Java)               | czh-favorites-db-rpm/pom.xml                                                              |
+| GitHub Actions CI        | maven.yml                    | (CI)                  | (GitHub Actions YAML)               | .github/workflows/maven.yml                                                               |
 
 ---
 
 ## Section 2 — Brief code map
 
 ```
-czh-favorites-api/   cz.bsl.czh.favourites.api    JSON request/response DTOs; no Spring, no DB.
+czh-favorites-api/   cz.bsl.czh.favorites.api    JSON request/response DTOs; no Spring, no DB.
                                                    WagerDto is the WAGER_JSON blob shape.
                                                    Page wrappers carry items + totalCount.
 
-czh-favorites-app/   cz.bsl.favourites             FavouritesApplication (@SpringBootApplication)
-                     cz.bsl.favourites.config      FavouritesProperties (@ConfigurationProperties
-                                                     prefix=favourites), DataSourceConfig
+czh-favorites-app/   cz.bsl.favorites             FavoritesApplication (@SpringBootApplication)
+                     cz.bsl.favorites.config      FavoritesProperties (@ConfigurationProperties
+                                                     prefix=favorites), DataSourceConfig
                                                      (HikariCP; DB2 prod / HSQLDB test profile)
-                     cz.bsl.czh.favourites.dao     JdbcTemplate DAOs — FavouritesGroupDaoImpl
-                                                     (GIS_FAV_GROUP), FavouritesWagerDaoImpl
+                     cz.bsl.czh.favorites.dao     JdbcTemplate DAOs — FavoritesGroupDaoImpl
+                                                     (GIS_FAV_GROUP), FavoritesWagerDaoImpl
                                                      (GIS_FAV_WAGER); RowMapper inner classes;
-                                                     FavouriteGroupRecord, FavouriteWagerRecord
-                     cz.bsl.czh.favourites.service (SP5) FavouritesService, FavouritesValidator,
-                                                     FavouritesConverter
-                     cz.bsl.czh.favourites.server  PlayerContextResolver (X-Player-Id header),
+                                                     FavoriteGroupRecord, FavoriteWagerRecord
+                     cz.bsl.czh.favorites.service (SP5) FavoritesService, FavoritesValidator,
+                                                     FavoritesConverter
+                     cz.bsl.czh.favorites.server  PlayerContextResolver (X-Player-Id header),
                                                      CdcReader (CDC draw file reader)
-                     cz.bsl.czh.favourites.metrics (SP8) FavouritesMetrics — wager + group
-                                                     Prometheus counters (favourites_wager_
-                                                     operation_total / favourites_group_
+                     cz.bsl.czh.favorites.metrics (SP8) FavoritesMetrics — wager + group
+                                                     Prometheus counters (favorites_wager_
+                                                     operation_total / favorites_group_
                                                      operation_total)
-                     cz.bsl.favourites.web         (SP6) FavouritesController — 10 endpoints:
+                     cz.bsl.favorites.web         (SP6) FavoritesController — 10 endpoints under
+                                                     /{version}/draw-games/favorite-wagers:
                                                      5 wager (CRUD + list), 5 group (CRUD + list)
-                                                     FavouritesErrorHandler (@ControllerAdvice:
+                                                     FavoritesErrorHandler (@ControllerAdvice:
                                                        IAE→400, NSE→404)
-                                                   (SP7) AdminFavouritesController — 4 read-only
-                                                     admin endpoints at /admin/favourites/players/
-                                                     {playerId}/wagers|groups
-                     cz.bsl.favourites.config      FavouritesProperties, DataSourceConfig,
+                                                   (SP7) AdminFavoritesController — 4 read-only
+                                                     admin endpoints at /admin/{version}/player/
+                                                     {playerId}/draw-games/favorite-wagers/
+                                                     wagers|wagers/{id}|groups|groups/{n}
+                                                     (list-groups is a GUI-only extra)
+                     cz.bsl.favorites.config      FavoritesProperties, DataSourceConfig,
                                                    (SP10) GuiResourceConfig — @ManagementContextConfiguration
                                                      maps /gui/** to classpath:/gui/ on the management
                                                      context only (port 9291); forwards / -> /gui/index.html;
@@ -91,20 +93,20 @@ czh-favorites-app/   cz.bsl.favourites             FavouritesApplication (@Sprin
                                                      /gui/ asset refs) so the browser fetches under the
                                                      context root. No-op direct-on-port.
 
-czh-favorites-app/   cz.bsl.czh.favourites.test    Test infrastructure (test scope only):
+czh-favorites-app/   cz.bsl.czh.favorites.test    Test infrastructure (test scope only):
   (test)               (test)                        JamcrestUtils — GraalVM JS JSON validation
                                                      AbstractRestTest — @SpringBootTest base,
                                                        non-throwing RestTemplate, asPlayer()
-                                                     FavouritesRestSmokeTest — context + health + GUI
+                                                     FavoritesRestSmokeTest — context + health + GUI
                                                        index smoke (management port, vision-base meta)
                                                      VisionBaseTest — VisionBaseContextFilter coverage
                                                        (no-header pass-through, with-header rewrite,
                                                        root direct-serve, JS byte-for-byte, actuator
                                                        pass-through, frame-loadable)
                                                      VisionHarnessMain — standalone main() that boots
-                                                       FavouritesApplication on 9290/9291 with the test
+                                                       FavoritesApplication on 9290/9291 with the test
                                                        profile for the vision-test.sh nginx harness
-                     cz.bsl.czh.favourites.config  TestDatabaseConfig (@TestConfiguration @Profile
+                     cz.bsl.czh.favorites.config  TestDatabaseConfig (@TestConfiguration @Profile
                        (test)                         "test") — runs dao-test-schema.sql on HSQLDB,
                                                        guards with INFORMATION_SCHEMA double-create
                                                        check, exposes JamcrestUtils bean
@@ -114,16 +116,16 @@ test/                 (bash)                       test-functions.sh — shared 
                                                    vision-test.sh — nginx reverse-proxy harness: boots the
                                                      Java backend on 9290/9291, starts nginx on 8080 with
                                                      the vision-nginx fixture, asserts the GUI + admin API
-                                                     + actuator work through the /favourites-mgmt and
-                                                     /favourites context roots. --hold for manual browser.
+                                                     + actuator work through the /favorites-mgmt and
+                                                     /favorites context roots. --hold for manual browser.
                    test/fixtures/vision-nginx/      nginx.conf + conf.d/vision-demo.conf — reverse-proxy
-                                                     fixture mapping /favourites-mgmt -> mgmt 9291 (gui +
-                                                     actuator) / app 9290 (admin), /favourites -> app 9290;
+                                                     fixture mapping /favorites-mgmt -> mgmt 9291 (gui +
+                                                     actuator) / app 9290 (admin), /favorites -> app 9290;
                                                      sets X-Vision-Base on every proxied request.
 
 czh-favorites-db/    src/main/delta/               db2delta SQL scripts — no Java.
-                                                   001-create-gis-fav-group.sql
-                                                   002-create-gis-fav-wager.sql
+                                                   001-create-gis-fav-group.delta
+                                                   002-create-gis-fav-wager.delta
 
 czh-favorites-app-rpm/  src/main/resources/       (SP9) App RPM: fat-jar → /opt/czh-favorites/lib/
                          bin/                        start/stop/status/kill/version scripts
@@ -133,7 +135,7 @@ czh-favorites-app-rpm/  src/main/resources/       (SP9) App RPM: fat-jar → /op
 czh-favorites-db-rpm/   src/main/bin/             (SP9) DB delta RPM: SQL → /opt/czh-favorites-db/structure/
                                                    run-delta.sh — applies db2delta migrations
 
-.github/workflows/       build.yml                (SP9) GitHub Actions CI: JDK 25 Temurin,
+.github/workflows/       maven.yml                (SP9) GitHub Actions CI: JDK 25 Temurin,
                                                    mvn install -Drpm=true -P github-ci on develop
 ```
 
@@ -142,54 +144,54 @@ czh-favorites-db-rpm/   src/main/bin/             (SP9) DB delta RPM: SQL → /o
 ## Section 3 — Sanename → file quick-lookup
 
 ```
-favourites-app          → czh-favorites-app/src/main/java/cz/bsl/favourites/FavouritesApplication.java
-favourites-properties   → czh-favorites-app/src/main/java/cz/bsl/favourites/config/FavouritesProperties.java
-favourites-datasource   → czh-favorites-app/src/main/java/cz/bsl/favourites/config/DataSourceConfig.java
+favorites-app          → czh-favorites-app/src/main/java/cz/bsl/favorites/FavoritesApplication.java
+favorites-properties   → czh-favorites-app/src/main/java/cz/bsl/favorites/config/FavoritesProperties.java
+favorites-datasource   → czh-favorites-app/src/main/java/cz/bsl/favorites/config/DataSourceConfig.java
 
-FavouriteWagerDto       → czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteWagerDto.java
-FavouriteGroupDto       → czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteGroupDto.java
-WagerDto                → czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/WagerDto.java
-FavouriteWagerPageDto   → czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteWagerPageDto.java
-FavouriteGroupPageDto   → czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteGroupPageDto.java
+FavoriteWagerDto       → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteWagerDto.java
+FavoriteGroupDto       → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteGroupDto.java
+WagerDto                → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/WagerDto.java
+FavoriteWagerPageDto   → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteWagerPageDto.java
+FavoriteGroupPageDto   → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteGroupPageDto.java
 
-FavouritesGroupDao      → czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouritesGroupDaoImpl.java
-FavouritesWagerDao      → czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouritesWagerDaoImpl.java
-FavouriteGroupRecord    → czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouriteGroupRecord.java
-FavouriteWagerRecord    → czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouriteWagerRecord.java
+FavoritesGroupDao      → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesGroupDaoImpl.java
+FavoritesWagerDao      → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesWagerDaoImpl.java
+FavoriteGroupRecord    → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoriteGroupRecord.java
+FavoriteWagerRecord    → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoriteWagerRecord.java
 
-delta-group             → czh-favorites-db/src/main/delta/001-create-gis-fav-group.sql
-delta-wager             → czh-favorites-db/src/main/delta/002-create-gis-fav-wager.sql
+delta-group             → czh-favorites-db/src/main/delta/001-create-gis-fav-group.delta
+delta-wager             → czh-favorites-db/src/main/delta/002-create-gis-fav-wager.delta
 
-TestDatabaseConfig      → czh-favorites-app/src/test/java/cz/bsl/czh/favourites/config/TestDatabaseConfig.java
-JamcrestUtils           → czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/JamcrestUtils.java
-AbstractRestTest        → czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/AbstractRestTest.java
-FavouritesRestSmokeTest → czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/FavouritesRestSmokeTest.java
+TestDatabaseConfig      → czh-favorites-app/src/test/java/cz/bsl/czh/favorites/config/TestDatabaseConfig.java
+JamcrestUtils           → czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/JamcrestUtils.java
+AbstractRestTest        → czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/AbstractRestTest.java
+FavoritesRestSmokeTest → czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/FavoritesRestSmokeTest.java
 
-FavouritesService       → czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesService.java
-DefaultFavouritesService → czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/DefaultFavouritesService.java
-FavouritesConverter     → czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesConverter.java
-FavouritesValidator     → czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesValidator.java
+FavoritesService       → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesService.java
+DefaultFavoritesService → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/DefaultFavoritesService.java
+FavoritesConverter     → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesConverter.java
+FavoritesValidator     → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesValidator.java
 
-PlayerContextResolver   → czh-favorites-app/src/main/java/cz/bsl/czh/favourites/server/PlayerContextResolver.java
-CdcReader               → czh-favorites-app/src/main/java/cz/bsl/czh/favourites/server/CdcReader.java
+PlayerContextResolver   → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/server/PlayerContextResolver.java
+CdcReader               → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/server/CdcReader.java
 
-FavouritesController    → czh-favorites-app/src/main/java/cz/bsl/favourites/web/FavouritesController.java
-FavouritesErrorHandler  → czh-favorites-app/src/main/java/cz/bsl/favourites/web/FavouritesErrorHandler.java
-FavouritesWagerControllerTest → czh-favorites-app/src/test/java/cz/bsl/favourites/web/FavouritesWagerControllerTest.java
-FavouritesGroupControllerTest → czh-favorites-app/src/test/java/cz/bsl/favourites/web/FavouritesGroupControllerTest.java
-FavouritesValidationTest → czh-favorites-app/src/test/java/cz/bsl/favourites/web/FavouritesValidationTest.java
-FavouritesErrorHandlerTest → czh-favorites-app/src/test/java/cz/bsl/favourites/web/FavouritesErrorHandlerTest.java
+FavoritesController    → czh-favorites-app/src/main/java/cz/bsl/favorites/web/FavoritesController.java
+FavoritesErrorHandler  → czh-favorites-app/src/main/java/cz/bsl/favorites/web/FavoritesErrorHandler.java
+FavoritesWagerControllerTest → czh-favorites-app/src/test/java/cz/bsl/favorites/web/FavoritesWagerControllerTest.java
+FavoritesGroupControllerTest → czh-favorites-app/src/test/java/cz/bsl/favorites/web/FavoritesGroupControllerTest.java
+FavoritesValidationTest → czh-favorites-app/src/test/java/cz/bsl/favorites/web/FavoritesValidationTest.java
+FavoritesErrorHandlerTest → czh-favorites-app/src/test/java/cz/bsl/favorites/web/FavoritesErrorHandlerTest.java
 
-AdminFavouritesController → czh-favorites-app/src/main/java/cz/bsl/favourites/web/AdminFavouritesController.java
-AdminFavouritesControllerTest → czh-favorites-app/src/test/java/cz/bsl/favourites/web/AdminFavouritesControllerTest.java
+AdminFavoritesController → czh-favorites-app/src/main/java/cz/bsl/favorites/web/AdminFavoritesController.java
+AdminFavoritesControllerTest → czh-favorites-app/src/test/java/cz/bsl/favorites/web/AdminFavoritesControllerTest.java
 
-FavouritesMetrics       → czh-favorites-app/src/main/java/cz/bsl/czh/favourites/metrics/FavouritesMetrics.java
-FavouritesMetricsTest   → czh-favorites-app/src/test/java/cz/bsl/czh/favourites/metrics/FavouritesMetricsTest.java
+FavoritesMetrics       → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/metrics/FavoritesMetrics.java
+FavoritesMetricsTest   → czh-favorites-app/src/test/java/cz/bsl/czh/favorites/metrics/FavoritesMetricsTest.java
 
-GuiResourceConfig       → czh-favorites-app/src/main/java/cz/bsl/favourites/config/GuiResourceConfig.java
-VisionBaseContextFilter → czh-favorites-app/src/main/java/cz/bsl/favourites/config/VisionBaseContextFilter.java
-VisionBaseTest          → czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/it/VisionBaseTest.java
-VisionHarnessMain       → czh-favorites-app/src/test/java/cz/bsl/czh/favourites/test/VisionHarnessMain.java
+GuiResourceConfig       → czh-favorites-app/src/main/java/cz/bsl/favorites/config/GuiResourceConfig.java
+VisionBaseContextFilter → czh-favorites-app/src/main/java/cz/bsl/favorites/config/VisionBaseContextFilter.java
+VisionBaseTest          → czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/it/VisionBaseTest.java
+VisionHarnessMain       → czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/VisionHarnessMain.java
 vision-test             → test/vision-test.sh
 vision-nginx-fixture    → test/fixtures/vision-nginx/nginx.conf, test/fixtures/vision-nginx/conf.d/vision-demo.conf
 gui/index.html          → czh-favorites-app/src/main/resources/gui/index.html
@@ -207,7 +209,7 @@ logback-rpm             → czh-favorites-app-rpm/src/main/resources/config/logb
 czh-favorites-db-rpm    → czh-favorites-db-rpm/pom.xml
 run-delta.sh            → czh-favorites-db-rpm/src/main/bin/run-delta.sh
 
-build.yml               → .github/workflows/build.yml
+maven.yml               → .github/workflows/maven.yml
 ```
 
 ---
@@ -229,13 +231,13 @@ context prefix before proxying and sets an `X-Vision-Base` request header; `Visi
 reads it and rewrites the GUI HTML so the browser's absolute site paths resolve under the context
 root. Direct-on-port (no header) is a no-op — the GUI works unchanged at `/gui/` on port 9291.
 
-| Browser URL (through nginx)               | Proxied to            | Context root (`X-Vision-Base`) |
-|-------------------------------------------|-----------------------|--------------------------------|
-| `/favourites-mgmt/gui/**`                 | mgmt 9291 `/gui/**`   | `/favourites-mgmt`             |
-| `/favourites-mgmt/actuator/**`            | mgmt 9291 `/actuator` | `/favourites-mgmt`             |
-| `/favourites-mgmt/admin/**`               | app 9290 `/admin/**`  | `/favourites-mgmt`             |
-| `/favourites/admin/**` (direct/cron)      | app 9290 `/admin/**`  | `/favourites`                  |
-| `/favourites/favourites/**` (direct/cron) | app 9290 `/favourites`| `/favourites`                  |
+| Browser URL (through nginx)                                        | Proxied to            | Context root (`X-Vision-Base`) |
+|--------------------------------------------------------------------|-----------------------|--------------------------------|
+| `/favorites-mgmt/gui/**`                                           | mgmt 9291 `/gui/**`   | `/favorites-mgmt`              |
+| `/favorites-mgmt/actuator/**`                                      | mgmt 9291 `/actuator` | `/favorites-mgmt`              |
+| `/favorites-mgmt/admin/**`                                         | app 9290 `/admin/**`  | `/favorites-mgmt`              |
+| `/favorites/admin/**` (direct/cron)                                | app 9290 `/admin/**`  | `/favorites`                   |
+| `/favorites/{version}/draw-games/favorite-wagers/**` (direct/cron) | app 9290              | `/favorites`                   |
 
 The GUI's `api.js` reads `<meta name="vision-base">` (filled by the filter) at load time and prefixes
 every fetch (`/admin/...`, `/actuator/...`) with it, so all browser requests stay same-origin on the

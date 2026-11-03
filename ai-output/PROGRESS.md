@@ -1,4 +1,4 @@
-# czh-favourites — Current Work
+# czh-favorites — Current Work
 
 ## Active plans
 - `.planning/plans/SP2_API_MODELS_PLAN.md`

@@ -1,7 +1,7 @@
 # SP9: Deployment — Detailed Implementation Plan
 
 **Sub-plan:** SP9 of 10  
-**Sanename:** `favourites`  
+**Sanename:** `favorites`  
 **Root package:** N/A (no Java — RPM config, shell scripts, YAML CI)  
 **Progress state:** `.planning/state/SP9_DEPLOYMENT_PROGRESS.md`
 
@@ -30,7 +30,7 @@ the fat-jar into an RPM installable to `/opt/czh-favorites/`.
 - `/java/czh/czh-money/money-app-rpm/src/main/resources/bin/status-service.sh`
 - `/java/czh/czh-money/money-app-rpm/src/main/resources/bin/version.sh`
 - `czh-favorites-app/src/main/resources/application.yml` (confirm port 9290, management 9291)
-- `/java/czh/czh-favourites/pom.xml` (root POM groupId, version, rpm-plugin.version)
+- `/java/czh/czh-favorites/pom.xml` (root POM groupId, version, rpm-plugin.version)
 
 ### Tasks
 
@@ -38,9 +38,9 @@ the fat-jar into an RPM installable to `/opt/czh-favorites/`.
 
 Mirror `money-app-rpm/pom.xml` with these substitutions:
 
-| czh-money value                  | czh-favourites value                 |
+| czh-money value                  | czh-favorites value                 |
 |----------------------------------|--------------------------------------|
-| `czh-money`                      | `czh-favourites` (parent artifactId) |
+| `czh-money`                      | `czh-favorites` (parent artifactId) |
 | `money-app`                      | `czh-favorites-app`                  |
 | `money-app-rpm`                  | `czh-favorites-app-rpm`              |
 | `/opt/czh-money`                 | `/opt/czh-favorites`                 |
@@ -100,7 +100,7 @@ Copy `/java/czh/czh-money/money-app-rpm/src/main/resources/config/logback-spring
 
 #### 1.5 — Add module to root POM
 
-Add `<module>czh-favorites-app-rpm</module>` to `/java/czh/czh-favourites/pom.xml` after `czh-favorites-db`.
+Add `<module>czh-favorites-app-rpm</module>` to `/java/czh/czh-favorites/pom.xml` after `czh-favorites-db`.
 
 ```sh
 ~/bin/geany-progress done 1 \
@@ -127,9 +127,9 @@ into an RPM installable to `/opt/czh-favorites-db/`.
 
 Mirror `czh-money-db-rpm/pom.xml` with substitutions:
 
-| czh-money value                  | czh-favourites value                 |
+| czh-money value                  | czh-favorites value                 |
 |----------------------------------|--------------------------------------|
-| `czh-money`                      | `czh-favourites`                     |
+| `czh-money`                      | `czh-favorites`                     |
 | `czh-money-db`                   | `czh-favorites-db`                   |
 | `czh-money-db-rpm`               | `czh-favorites-db-rpm`               |
 | `/opt/czh-money-db`              | `/opt/czh-favorites-db`              |
@@ -146,7 +146,7 @@ files in sequence using db2delta.
 
 #### 2.3 — Add module to root POM
 
-Add `<module>czh-favorites-db-rpm</module>` to `/java/czh/czh-favourites/pom.xml`.
+Add `<module>czh-favorites-db-rpm</module>` to `/java/czh/czh-favorites/pom.xml`.
 
 ```sh
 ~/bin/geany-progress done 2 \
@@ -176,7 +176,7 @@ Port `czh-money` `maven.yml` verbatim, changing only:
 - Maven command: `mvn -B install -Duser.timezone=Europe/Prague -Drpm=true -P github-ci`
 
 The `github-ci` profile must be defined in the root POM (or inherited from the parent BOM). Check
-if `github-ci` exists in `/java/czh/czh-favourites/pom.xml`; if not, add it with the same
+if `github-ci` exists in `/java/czh/czh-favorites/pom.xml`; if not, add it with the same
 datasource override (H2 for DB2) as czh-money uses.
 
 ```yaml
@@ -210,7 +210,7 @@ jobs:
 
 #### 3.2 — Verify `github-ci` profile exists in root POM
 
-Open `/java/czh/czh-favourites/pom.xml`. If no `github-ci` profile exists, add one that:
+Open `/java/czh/czh-favorites/pom.xml`. If no `github-ci` profile exists, add one that:
 - Sets `spring.datasource.url=jdbc:h2:mem:testdb` (or the HSQLDB equivalent already used in tests)
 - Sets `spring.datasource.driver-class-name=org.hsqldb.jdbc.JDBCDriver`
 - Excludes the DB2 driver from the build classpath

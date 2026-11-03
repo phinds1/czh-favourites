@@ -1,37 +1,37 @@
-# Java 6 Migration — czh-favourites
+# Java 6 Migration — czh-favorites
 
 This project is a Spring Boot 4 microservice that stores players' favourite wagers and makes them available for replay.
 
 It is ported from the Java 6 GIS monolith available for reading and copying in `./references/gis/`. Significant redesign is required because the original implementation is tightly coupled to GIS internal services (Hibernate ORM, JBoss RESTEasy, JMX, Guava, Joda Time) and runs inside the GIS monolithic application server.
 
-**Sanename:** `favourites`  
-All code, test files, and log messages referring to this feature should use the word `favourites` so that `grep favourites` finds everything related to this microservice.
+**Sanename:** `favorites`  
+All code, test files, and log messages referring to this feature should use the word `favorites` so that `grep favorites` finds everything related to this microservice.
 
 `./references` includes:
 - `gis` — the source monolith containing the features we are porting
 - `czh-money` — a different GIS component already ported to Java 25 / Spring Boot 4; use as a pattern reference
 
-Current problem with production: the favourites feature is tightly coupled to the GIS server and cannot be scaled, deployed, or tested independently.
+Current problem with production: the favorites feature is tightly coupled to the GIS server and cannot be scaled, deployed, or tested independently.
 
 ---
 
 ## Core classes to port
 
-Core code lives in the `czh-favorites-app` sub-module under package `cz.bsl.czh.favourites`.
+Core code lives in the `czh-favorites-app` sub-module under package `cz.bsl.czh.favorites`.
 
 ### Service layer
 
 | Legacy class                       | New class                                                     | Notes                                                                                                                                                                                                                                                                        |
 |------------------------------------|---------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `DefaultFavoriteWagerService`      | `cz.bsl.czh.favourites.service.FavouritesService`             | Port business logic; replace `@ManagedResource`/`@ManagedAttribute` (JMX) with `@ConfigurationProperties`; replace Guava `FluentIterable`/`Ordering` with Java streams; remove `DTOValidator` / Hibernate `ConstraintViolation` — replace with plain Java validation methods |
-| `FavoriteWagerService` (interface) | `cz.bsl.czh.favourites.service.FavouritesService` (interface) | Slim down; keep the six wager operations and four group operations                                                                                                                                                                                                           |
-| `DefaultFavoriteWagerConverter`    | `cz.bsl.czh.favourites.service.FavouritesConverter`           | Converts between JSON API DTOs and domain objects; replace Joda `DateTime` with `java.time.Instant`; replace Guava with standard Java                                                                                                                                        |
-| `FavoriteWagerValidator`           | `cz.bsl.czh.favourites.service.FavouritesValidator`           | Port all validation rules as plain Java; no Hibernate Validator                                                                                                                                                                                                              |
+| `DefaultFavoriteWagerService`      | `cz.bsl.czh.favorites.service.FavoritesService`             | Port business logic; replace `@ManagedResource`/`@ManagedAttribute` (JMX) with `@ConfigurationProperties`; replace Guava `FluentIterable`/`Ordering` with Java streams; remove `DTOValidator` / Hibernate `ConstraintViolation` — replace with plain Java validation methods |
+| `FavoriteWagerService` (interface) | `cz.bsl.czh.favorites.service.FavoritesService` (interface) | Slim down; keep the six wager operations and four group operations                                                                                                                                                                                                           |
+| `DefaultFavoriteWagerConverter`    | `cz.bsl.czh.favorites.service.FavoritesConverter`           | Converts between JSON API DTOs and domain objects; replace Joda `DateTime` with `java.time.Instant`; replace Guava with standard Java                                                                                                                                        |
+| `FavoriteWagerValidator`           | `cz.bsl.czh.favorites.service.FavoritesValidator`           | Port all validation rules as plain Java; no Hibernate Validator                                                                                                                                                                                                              |
 
 **Configuration properties** (replacing JMX-managed setters in `DefaultFavoriteWagerService`):
 
 ```yaml
-favourites:
+favorites:
   min-group-index: 1
   max-group-index: 10
   default-group-name: ""
@@ -51,7 +51,7 @@ The `PlayerAuthentication` and `PlayerContextFactory` classes are replaced by a 
 
 ## Quartz jobs
 
-The original GIS application had no Quartz jobs associated with the favourites feature. There are **no scheduled jobs** to port.
+The original GIS application had no Quartz jobs associated with the favorites feature. There are **no scheduled jobs** to port.
 
 ---
 
@@ -61,12 +61,12 @@ The relevant DTOs from `gateway-draw-games-rest-api-2.6.43.0.jar` are:
 
 | Legacy DTO                  | New class                                     | Location                   |
 |-----------------------------|-----------------------------------------------|----------------------------|
-| `FavoriteWagerDTO`          | `cz.bsl.favourites.api.FavouriteWagerDto`     | `czh-favorites-api` module |
-| `FavoriteWagerGroupDTO`     | `cz.bsl.favourites.api.FavouriteGroupDto`     | `czh-favorites-api` module |
-| `FavoriteWagerPageDTO`      | `cz.bsl.favourites.api.FavouriteWagerPageDto` | `czh-favorites-api` module |
-| `FavoriteWagerGroupPageDTO` | `cz.bsl.favourites.api.FavouriteGroupPageDto` | `czh-favorites-api` module |
+| `FavoriteWagerDTO`          | `cz.bsl.favorites.api.FavouriteWagerDto`     | `czh-favorites-api` module |
+| `FavoriteWagerGroupDTO`     | `cz.bsl.favorites.api.FavouriteGroupDto`     | `czh-favorites-api` module |
+| `FavoriteWagerPageDTO`      | `cz.bsl.favorites.api.FavouriteWagerPageDto` | `czh-favorites-api` module |
+| `FavoriteWagerGroupPageDTO` | `cz.bsl.favorites.api.FavouriteGroupPageDto` | `czh-favorites-api` module |
 
-Copy only these four DTOs. Change all package names to `cz.bsl.czh.favourites.api`. Remove all JAX-RS, Jackson 1.x, and Joda Time imports; use Jackson 2 (`com.fasterxml.jackson.annotation`) and `java.time`. The `WagerDTO` (nested inside `FavoriteWagerDTO`) must also be copied and repackaged; it carries `gameName`, `stake`, `price`, `duration`, `serialNumber`, and `boards`.
+Copy only these four DTOs. Change all package names to `cz.bsl.czh.favorites.api`. Remove all JAX-RS, Jackson 1.x, and Joda Time imports; use Jackson 2 (`com.fasterxml.jackson.annotation`) and `java.time`. The `WagerDTO` (nested inside `FavoriteWagerDTO`) must also be copied and repackaged; it carries `gameName`, `stake`, `price`, `duration`, `serialNumber`, and `boards`.
 
 ---
 
@@ -124,10 +124,10 @@ CREATE INDEX IDX_FAV_WAGER_GAME   ON GIS_FAV_WAGER (PLAYER_ID, GAME_NAME);
 
 | New class                                      | Responsibility                                                                |
 |------------------------------------------------|-------------------------------------------------------------------------------|
-| `cz.bsl.czh.favourites.dao.FavouritesGroupDao` | CRUD on `GIS_FAV_GROUP` via `JdbcTemplate`                                    |
-| `cz.bsl.czh.favourites.dao.FavouritesWagerDao` | CRUD on `GIS_FAV_WAGER` via `JdbcTemplate`; serialises/deserialises JSON blob |
+| `cz.bsl.czh.favorites.dao.FavoritesGroupDao` | CRUD on `GIS_FAV_GROUP` via `JdbcTemplate`                                    |
+| `cz.bsl.czh.favorites.dao.FavoritesWagerDao` | CRUD on `GIS_FAV_WAGER` via `JdbcTemplate`; serialises/deserialises JSON blob |
 
-All SQL is written as readable named-constant strings in the DAO class (no `NamedParameterJdbcTemplate` magic strings scattered in service code). The `FavouritesWagerDao.getFavoritesCount(playerId)` and `getFavoriteBoardsCount(playerId)` methods are replaced by a single `countWagers(playerId)` — the board-level count from the legacy code was a proxy for the same limit and is simplified.
+All SQL is written as readable named-constant strings in the DAO class (no `NamedParameterJdbcTemplate` magic strings scattered in service code). The `FavoritesWagerDao.getFavoritesCount(playerId)` and `getFavoriteBoardsCount(playerId)` methods are replaced by a single `countWagers(playerId)` — the board-level count from the legacy code was a proxy for the same limit and is simplified.
 
 ---
 
@@ -135,8 +135,8 @@ All SQL is written as readable named-constant strings in the DAO class (no `Name
 
 One Spring MVC `@RestController` replaces the legacy JAX-RS `PlayerFavoriteWagerResource`.
 
-**Controller:** `cz.bsl.favourites.web.FavouritesController`  
-**Base path:** `/favourites`
+**Controller:** `cz.bsl.favorites.web.FavoritesController`  
+**Base path:** `/favorites`
 
 All methods require the header `X-Player-Id` (player authentication, pre-authenticated by the gateway).
 
@@ -144,21 +144,21 @@ All methods require the header `X-Player-Id` (player authentication, pre-authent
 
 | Method   | Path                                                      | Legacy method         | Auth header required |
 |----------|-----------------------------------------------------------|-----------------------|----------------------|
-| `POST`   | `/favourites/wagers`                                      | `createFavoriteWager` | `X-Player-Id`        |
-| `GET`    | `/favourites/wagers/{id}`                                 | `getFavoriteWager`    | `X-Player-Id`        |
-| `PUT`    | `/favourites/wagers/{id}`                                 | `updateFavoriteWager` | `X-Player-Id`        |
-| `DELETE` | `/favourites/wagers/{id}`                                 | `deleteFavoriteWager` | `X-Player-Id`        |
-| `GET`    | `/favourites/wagers?group={groupNumber}&game-names={csv}` | `getFavoriteWagers`   | `X-Player-Id`        |
+| `POST`   | `/favorites/wagers`                                      | `createFavoriteWager` | `X-Player-Id`        |
+| `GET`    | `/favorites/wagers/{id}`                                 | `getFavoriteWager`    | `X-Player-Id`        |
+| `PUT`    | `/favorites/wagers/{id}`                                 | `updateFavoriteWager` | `X-Player-Id`        |
+| `DELETE` | `/favorites/wagers/{id}`                                 | `deleteFavoriteWager` | `X-Player-Id`        |
+| `GET`    | `/favorites/wagers?group={groupNumber}&game-names={csv}` | `getFavoriteWagers`   | `X-Player-Id`        |
 
 ### Group endpoints
 
 | Method   | Path                               | Legacy method                   | Auth header required |
 |----------|------------------------------------|---------------------------------|----------------------|
-| `POST`   | `/favourites/groups`               | `createFavoriteWagerGroup`      | `X-Player-Id`        |
-| `GET`    | `/favourites/groups/{groupNumber}` | `getFavoriteWagerGroup`         | `X-Player-Id`        |
-| `PUT`    | `/favourites/groups/{groupNumber}` | `updateFavoriteWagerGroup`      | `X-Player-Id`        |
-| `DELETE` | `/favourites/groups/{groupNumber}` | `deleteFavoriteWagerGroup`      | `X-Player-Id`        |
-| `GET`    | `/favourites/groups`               | `getFavoriteWagerGroupss` (sic) | `X-Player-Id`        |
+| `POST`   | `/favorites/groups`               | `createFavoriteWagerGroup`      | `X-Player-Id`        |
+| `GET`    | `/favorites/groups/{groupNumber}` | `getFavoriteWagerGroup`         | `X-Player-Id`        |
+| `PUT`    | `/favorites/groups/{groupNumber}` | `updateFavoriteWagerGroup`      | `X-Player-Id`        |
+| `DELETE` | `/favorites/groups/{groupNumber}` | `deleteFavoriteWagerGroup`      | `X-Player-Id`        |
+| `GET`    | `/favorites/groups`               | `getFavoriteWagerGroupss` (sic) | `X-Player-Id`        |
 
 ### Validation rules (port from `FavoriteWagerValidator`)
 
@@ -183,17 +183,17 @@ HTTP resource testing uses Spring's `MockMvc` (or `TestRestTemplate`) and Jamcre
 - Starts Spring Boot test context with H2 in-memory database (`spring.profiles.active=test`)
 - Provides helper methods `asPlayer(playerId)` to set `X-Player-Id` header on requests
 - Detects when a `*.resp.js` file does not exist and prints the actual JSON to stdout so it can be captured as the baseline
-- `*.req.js` request templates live under `src/test/resources/favourites/`
+- `*.req.js` request templates live under `src/test/resources/favorites/`
 
 ### Tests to write
 
-Every endpoint method in `FavouritesController` needs a Jamcrest test:
+Every endpoint method in `FavoritesController` needs a Jamcrest test:
 
 | Test class                    | Test methods                                                                                             |
 |-------------------------------|----------------------------------------------------------------------------------------------------------|
-| `FavouritesWagerResourceTest` | `createWager`, `getWager`, `updateWager`, `deleteWager`, `listWagersByGroup`, `listWagersByGroupAndGame` |
-| `FavouritesGroupResourceTest` | `createGroup`, `getGroup`, `updateGroup`, `deleteGroup`, `listGroups`                                    |
-| `FavouritesValidationTest`    | invalid id, missing player header, group limit exceeded, wager limit exceeded, duplicate group           |
+| `FavoritesWagerResourceTest` | `createWager`, `getWager`, `updateWager`, `deleteWager`, `listWagersByGroup`, `listWagersByGroupAndGame` |
+| `FavoritesGroupResourceTest` | `createGroup`, `getGroup`, `updateGroup`, `deleteGroup`, `listGroups`                                    |
+| `FavoritesValidationTest`    | invalid id, missing player header, group limit exceeded, wager limit exceeded, duplicate group           |
 
 The legacy GIS codebase has no surviving test resources with wager JSON examples in `references/gis`. Request/response `.req.js` and `.resp.js` fixtures must be written from scratch based on the DTO structure.
 

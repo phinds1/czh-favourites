@@ -1,8 +1,8 @@
 # SP5: Service Layer — Detailed Implementation Plan
 
 **Sub-plan:** SP5 of 10  
-**Sanename:** `favourites`  
-**Root package:** `cz.bsl.czh.favourites`  
+**Sanename:** `favorites`  
+**Root package:** `cz.bsl.czh.favorites`  
 **Progress state:** `.planning/state/SP5_SERVICE_LAYER_PROGRESS.md`
 
 ## Overview
@@ -13,7 +13,7 @@ Guava, Joda Time, Hibernate Validator, `GameServiceRegistry`, `WagerMinifier.exp
 normalised board-stack domain model. The new service works directly with `FavouriteWagerDto` /
 `FavouriteGroupDto` (API layer) and `FavouriteWagerRecord` / `FavouriteGroupRecord` (DAO layer).
 
-**`FavouritesProperties` already written in SP1 — do not recreate it.**
+**`FavoritesProperties` already written in SP1 — do not recreate it.**
 
 **Key design decisions:**
 - Converter maps `FavouriteWagerDto` ↔ `FavouriteWagerRecord` (no intermediate domain object)
@@ -33,26 +33,26 @@ Each phase fits in one Claude Sonnet 4.6 context window. Read **only** the files
 
 ---
 
-## Phase 1 — Write `FavouritesConverter`
+## Phase 1 — Write `FavoritesConverter`
 
 ### Goal
-`FavouritesConverter` converts between `FavouriteWagerDto`/`FavouriteGroupDto` (API) and
+`FavoritesConverter` converts between `FavouriteWagerDto`/`FavouriteGroupDto` (API) and
 `FavouriteWagerRecord`/`FavouriteGroupRecord` (DAO), serialising/deserialising `WAGER_JSON`
 via `ObjectMapper`.
 
 ### Files to read before starting
 - `references/gis/components/gis/gis-site/src/main/java/com/gtech/gis/site/converter/DefaultFavoriteWagerConverter.java`
-- `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteWagerDto.java`
-- `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteGroupDto.java`
-- `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/WagerDto.java`
-- `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouriteWagerRecord.java`
-- `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouriteGroupRecord.java`
+- `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavouriteWagerDto.java`
+- `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavouriteGroupDto.java`
+- `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/WagerDto.java`
+- `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavouriteWagerRecord.java`
+- `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavouriteGroupRecord.java`
 
 ### Tasks
 
-#### 1.1 — Write `FavouritesConverter.java`
+#### 1.1 — Write `FavoritesConverter.java`
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesConverter.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesConverter.java`
 
 `@Component`. Constructor-inject `ObjectMapper objectMapper`.
 
@@ -92,11 +92,11 @@ Implementation notes:
 - `toRecord(FavouriteGroupDto, playerId)` / `toDto(FavouriteGroupRecord)`: straightforward field mapping; no JSON
 - `toWagerPage` / `toGroupPage`: `new FavouriteWagerPageDto(records.stream().map(this::toDto).toList(), records.size())`
 
-Grep anchor: `favourites`
+Grep anchor: `favorites`
 
-#### 1.2 — Write `FavouritesConverterTest.java`
+#### 1.2 — Write `FavoritesConverterTest.java`
 
-**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/service/FavouritesConverterTest.java`
+**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/service/FavoritesConverterTest.java`
 
 Use `new ObjectMapper().registerModule(new JavaTimeModule())`. No Spring context needed.
 
@@ -111,30 +111,30 @@ Tests:
 
 ```sh
 ~/bin/geany-progress done 1 \
-  -r czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesConverter.java \
-  -r czh-favorites-app/src/test/java/cz/bsl/czh/favourites/service/FavouritesConverterTest.java
+  -r czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesConverter.java \
+  -r czh-favorites-app/src/test/java/cz/bsl/czh/favorites/service/FavoritesConverterTest.java
 ```
 
 ---
 
-## Phase 2 — Write `FavouritesValidator`
+## Phase 2 — Write `FavoritesValidator`
 
 ### Goal
-`FavouritesValidator` enforces all pre-condition rules as plain Java, throwing
+`FavoritesValidator` enforces all pre-condition rules as plain Java, throwing
 `IllegalArgumentException` with a human-readable message on failure.
 
 ### Files to read before starting
 - `references/gis/components/gis/gis-site/src/main/java/com/gtech/gis/site/validator/DefaultFavoriteWagerValidator.java`
-- `czh-favorites-app/src/main/java/cz/bsl/favourites/config/FavouritesProperties.java`
+- `czh-favorites-app/src/main/java/cz/bsl/favorites/config/FavoritesProperties.java`
 - `.planning/java25-spring-boot-migration.md` (validation rules section, lines 163–172)
 
 ### Tasks
 
-#### 2.1 — Write `FavouritesValidator.java`
+#### 2.1 — Write `FavoritesValidator.java`
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesValidator.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesValidator.java`
 
-`@Component`. Constructor-inject `FavouritesProperties properties`.
+`@Component`. Constructor-inject `FavoritesProperties properties`.
 
 Methods and rules:
 
@@ -183,11 +183,11 @@ Rules for `validateId`:
 
 **No Hibernate Validator, no `ConstraintViolation`. Plain `if` checks + `throw new IllegalArgumentException("message")`.**
 
-#### 2.2 — Write `FavouritesValidatorTest.java`
+#### 2.2 — Write `FavoritesValidatorTest.java`
 
-**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/service/FavouritesValidatorTest.java`
+**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/service/FavoritesValidatorTest.java`
 
-Create `FavouritesProperties` with defaults (minGroupIndex=1, maxGroupIndex=10, etc.) and pass to
+Create `FavoritesProperties` with defaults (minGroupIndex=1, maxGroupIndex=10, etc.) and pass to
 the constructor — no Spring context.
 
 Tests (one per rule):
@@ -209,8 +209,8 @@ Tests (one per rule):
 
 ```sh
 ~/bin/geany-progress done 2 \
-  -r czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesValidator.java \
-  -r czh-favorites-app/src/test/java/cz/bsl/czh/favourites/service/FavouritesValidatorTest.java
+  -r czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesValidator.java \
+  -r czh-favorites-app/src/test/java/cz/bsl/czh/favorites/service/FavoritesValidatorTest.java
 ```
 
 ---
@@ -229,7 +229,7 @@ and returns 0 when the file is absent.
 
 #### 3.1 — Write `PlayerContextResolver.java`
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/server/PlayerContextResolver.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/server/PlayerContextResolver.java`
 
 `@Component`.
 
@@ -240,7 +240,7 @@ and returns 0 when the file is absent.
  * Returns the player id string.
  * Throws IllegalArgumentException("Missing or blank X-Player-Id header") if absent or blank.
  *
- * Grep anchor: favourites
+ * Grep anchor: favorites
  */
 public String resolve(HttpServletRequest request) {
     String playerId = request.getHeader("X-Player-Id");
@@ -253,7 +253,7 @@ public String resolve(HttpServletRequest request) {
 
 #### 3.2 — Write `CdcReader.java`
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/server/CdcReader.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/server/CdcReader.java`
 
 `@Component`.
 
@@ -263,7 +263,7 @@ public String resolve(HttpServletRequest request) {
  * The file contains a single ASCII integer optionally followed by a newline.
  * Returns 0 when the file is absent (test environments, dev machines).
  *
- * Grep anchor: favourites
+ * Grep anchor: favorites
  */
 public int read() {
     Path path = Path.of("/run/mx/cdc");
@@ -281,7 +281,7 @@ public int read() {
 #### 3.3 — Write tests
 
 **`PlayerContextResolverTest.java`**  
-Path: `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/server/PlayerContextResolverTest.java`
+Path: `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/server/PlayerContextResolverTest.java`
 
 Use `MockHttpServletRequest`. Tests:
 - `resolve_returnsPlayerId`
@@ -290,7 +290,7 @@ Use `MockHttpServletRequest`. Tests:
 - `resolve_blankHeader_throws`
 
 **`CdcReaderTest.java`**  
-Path: `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/server/CdcReaderTest.java`
+Path: `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/server/CdcReaderTest.java`
 
 Tests:
 - `read_fileAbsent_returnsZero` — use a `CdcReader` that reads from a temp path that doesn't exist
@@ -299,42 +299,42 @@ Tests:
 
 Override the file path for testing by making the path configurable (e.g. package-private setter or
 constructor param) rather than hardcoded, so tests can inject a temp path. Keep the default
-`/run/mx/cdc` as the production value via `@Value("${favourites.cdc-path:/run/mx/cdc}")`.
+`/run/mx/cdc` as the production value via `@Value("${favorites.cdc-path:/run/mx/cdc}")`.
 
 ```sh
 ~/bin/geany-progress done 3 \
-  -r czh-favorites-app/src/main/java/cz/bsl/czh/favourites/server/PlayerContextResolver.java \
-  -r czh-favorites-app/src/main/java/cz/bsl/czh/favourites/server/CdcReader.java \
-  -r czh-favorites-app/src/test/java/cz/bsl/czh/favourites/server/PlayerContextResolverTest.java \
-  -r czh-favorites-app/src/test/java/cz/bsl/czh/favourites/server/CdcReaderTest.java
+  -r czh-favorites-app/src/main/java/cz/bsl/czh/favorites/server/PlayerContextResolver.java \
+  -r czh-favorites-app/src/main/java/cz/bsl/czh/favorites/server/CdcReader.java \
+  -r czh-favorites-app/src/test/java/cz/bsl/czh/favorites/server/PlayerContextResolverTest.java \
+  -r czh-favorites-app/src/test/java/cz/bsl/czh/favorites/server/CdcReaderTest.java
 ```
 
 ---
 
-## Phase 4 — Write `FavouritesService`
+## Phase 4 — Write `FavoritesService`
 
 ### Goal
-`FavouritesService` interface + `DefaultFavouritesService` implement all 10 operations (5 wager +
+`FavoritesService` interface + `DefaultFavoritesService` implement all 10 operations (5 wager +
 5 group), fully unit-tested with mocked DAOs.
 
 ### Files to read before starting
 - `references/gis/components/gis/gis-site/src/main/java/com/gtech/gis/site/service/DefaultFavoriteWagerService.java`
 - `references/gis/components/gis/gis-site/src/main/java/com/gtech/gis/site/service/FavoriteWagerService.java`
-- `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesConverter.java` (Phase 1 output)
-- `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesValidator.java` (Phase 2 output)
-- `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouritesGroupDao.java`
-- `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouritesWagerDao.java`
-- `czh-favorites-app/src/main/java/cz/bsl/favourites/config/FavouritesProperties.java`
+- `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesConverter.java` (Phase 1 output)
+- `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesValidator.java` (Phase 2 output)
+- `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesGroupDao.java`
+- `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesWagerDao.java`
+- `czh-favorites-app/src/main/java/cz/bsl/favorites/config/FavoritesProperties.java`
 
 ### Tasks
 
-#### 4.1 — Write `FavouritesService.java` (interface)
+#### 4.1 — Write `FavoritesService.java` (interface)
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesService.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesService.java`
 
 ```java
-/** Grep anchor: favourites */
-public interface FavouritesService {
+/** Grep anchor: favorites */
+public interface FavoritesService {
 
     // --- Wager operations ---
 
@@ -375,12 +375,12 @@ public interface FavouritesService {
 }
 ```
 
-#### 4.2 — Write `DefaultFavouritesService.java`
+#### 4.2 — Write `DefaultFavoritesService.java`
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/DefaultFavouritesService.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/DefaultFavoritesService.java`
 
-`@Service`. Constructor-inject `FavouritesGroupDao groupDao`, `FavouritesWagerDao wagerDao`,
-`FavouritesConverter converter`, `FavouritesValidator validator`, `FavouritesProperties properties`.
+`@Service`. Constructor-inject `FavoritesGroupDao groupDao`, `FavoritesWagerDao wagerDao`,
+`FavoritesConverter converter`, `FavoritesValidator validator`, `FavoritesProperties properties`.
 
 Key logic per operation (port from `DefaultFavoriteWagerService`):
 
@@ -443,15 +443,15 @@ Key logic per operation (port from `DefaultFavoriteWagerService`):
 1. `groupDao.findByPlayer(playerId)`
 2. Return `converter.toGroupPage(records)`
 
-Grep anchor: `favourites`
+Grep anchor: `favorites`
 
-#### 4.3 — Write `DefaultFavouritesServiceTest.java`
+#### 4.3 — Write `DefaultFavoritesServiceTest.java`
 
-**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/service/DefaultFavouritesServiceTest.java`
+**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/service/DefaultFavoritesServiceTest.java`
 
-Use Mockito (`@ExtendWith(MockitoExtension.class)`). Mock `FavouritesGroupDao`, `FavouritesWagerDao`.
-Use real `FavouritesConverter` (with `new ObjectMapper().registerModule(new JavaTimeModule())`).
-Use real `FavouritesValidator` (with default `FavouritesProperties`).
+Use Mockito (`@ExtendWith(MockitoExtension.class)`). Mock `FavoritesGroupDao`, `FavoritesWagerDao`.
+Use real `FavoritesConverter` (with `new ObjectMapper().registerModule(new JavaTimeModule())`).
+Use real `FavoritesValidator` (with default `FavoritesProperties`).
 
 Tests (one per operation + key error paths):
 - `createWager_persistsAndReturnsDto`
@@ -476,9 +476,9 @@ Tests (one per operation + key error paths):
 
 ```sh
 ~/bin/geany-progress done 4 \
-  -r czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/FavouritesService.java \
-  -r czh-favorites-app/src/main/java/cz/bsl/czh/favourites/service/DefaultFavouritesService.java \
-  -r czh-favorites-app/src/test/java/cz/bsl/czh/favourites/service/DefaultFavouritesServiceTest.java
+  -r czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesService.java \
+  -r czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/DefaultFavoritesService.java \
+  -r czh-favorites-app/src/test/java/cz/bsl/czh/favorites/service/DefaultFavoritesServiceTest.java
 ```
 
 ---
@@ -502,7 +502,7 @@ bin/coverage.sh
 
 Target ≥ 80% instruction coverage for all four new service classes. `CdcReader.read()` for the
 `/run/mx/cdc` production path will not be covered in unit tests — accept this exception and note
-it. `DefaultFavouritesService` all 10 operation methods must be covered.
+it. `DefaultFavoritesService` all 10 operation methods must be covered.
 
 #### 5.3 — Security
 
@@ -511,7 +511,7 @@ Run `/security-java` on new service files. Expected areas to check:
 | Area | Expected result |
 |------|----------------|
 | `X-Player-Id` as SQL input via `playerId` parameter | All DAO calls use `?` placeholders — no risk |
-| `wagerJson` size before DB write | `FavouritesConverter.toRecord` serialises `WagerDto` — add `if (json.length() > 30000) throw IllegalArgumentException` |
+| `wagerJson` size before DB write | `FavoritesConverter.toRecord` serialises `WagerDto` — add `if (json.length() > 30000) throw IllegalArgumentException` |
 | `groupNumber` as path variable flows to DAO | `validateGroupNumber` is called before every DAO query — covered |
 | `CdcReader` reading from configurable path | Path is `@Value`-injected and defaults to `/run/mx/cdc`; no user input controls the path |
 
@@ -519,7 +519,7 @@ For any HIGH finding: write failing test → fix → confirm green.
 
 #### 5.4 — Refactor
 
-Check `DefaultFavouritesService` for:
+Check `DefaultFavoritesService` for:
 - Repeated ownership-check pattern (load + null check + player check) → extract `private FavouriteWagerRecord requireWager(long id, String playerId)` helper
 - Same for groups → `private FavouriteGroupRecord requireGroup(String groupNumber, String playerId)`
 
@@ -527,7 +527,7 @@ Re-run tests after refactor.
 
 #### 5.5 — Routing map
 
-Run `/routing-map` to add `cz.bsl.czh.favourites.service` and `cz.bsl.czh.favourites.server`
+Run `/routing-map` to add `cz.bsl.czh.favorites.service` and `cz.bsl.czh.favorites.server`
 packages to `.requirements/design/routing.md`.
 
 #### 5.6 — Write progress state

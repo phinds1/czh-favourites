@@ -5,7 +5,7 @@
 | 1     | Port `JamcrestUtils` + verify Jamcrest deps      | pending |
 | 2     | Write `TestDatabaseConfig` (HSQLDB schema init)  | pending |
 | 3     | Write `AbstractRestTest`                         | pending |
-| 4     | Write `FavouritesRestSmokeTest`                  | pending |
+| 4     | Write `FavoritesRestSmokeTest`                   | pending |
 | 5     | Post-SP sign-off: coverage → refactor → routing  | pending |
 
 ## Resume instructions

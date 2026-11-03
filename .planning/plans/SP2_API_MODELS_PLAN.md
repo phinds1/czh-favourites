@@ -1,15 +1,15 @@
 # SP2: JSON API Models — Detailed Implementation Plan
 
 **Sub-plan:** SP2 of 10  
-**Sanename:** `favourites`  
-**Root package:** `cz.bsl.czh.favourites`  
+**Sanename:** `favorites`  
+**Root package:** `cz.bsl.czh.favorites`  
 **Progress state:** `.planning/state/SP2_API_MODELS_PROGRESS.md`
 
 ## Overview
 
 Port the four legacy DTOs from `gateway-draw-games-rest-api` into `czh-favorites-api`, clean of
-all JAX-RS, Jackson 1.x, and Joda Time. Add `WagerDto` (the nested wager sub-object). All classes
-land in `cz.bsl.czh.favourites.api`. Jackson 2 annotations and `java.time.Instant` throughout.
+all JAX-RS, Jackson 1.x, and Joda Time. avorites `WagerDto` (the nested wager sub-object). All classes
+land in `cz.bsl.czh.favorites.api`. Jackson 2 annotations and `java.time.Instant` throughout.
 No Hibernate Validator. The SP is done when every DTO round-trips cleanly through Jackson and
 `./mvn.sh -pl czh-favorites-api test` is green.
 
@@ -34,10 +34,10 @@ before continuing to the next phase.
 
 #### 1.1 — Write `WagerDto.java`
 
-**Path:** `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/WagerDto.java`
+**Path:** `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/WagerDto.java`
 
 Rules:
-- Package: `cz.bsl.czh.favourites.api`
+- Package: `cz.bsl.czh.favorites.api`
 - Remove all `com.gtech`, `org.codehaus.jackson`, Joda Time imports — use Jackson 2
   (`com.fasterxml.jackson.annotation`) only
 - Fields to keep (from migration plan):
@@ -55,7 +55,7 @@ Rules:
 
 #### 1.2 — Write `WagerDtoTest.java`
 
-**Path:** `czh-favorites-api/src/test/java/cz/bsl/czh/favourites/api/WagerDtoTest.java`
+**Path:** `czh-favorites-api/src/test/java/cz/bsl/czh/favorites/api/WagerDtoTest.java`
 
 Use an `ObjectMapper` instance (no Spring context needed — just `new ObjectMapper()`; no
 `JavaTimeModule` needed here since there are no `Instant` fields in `WagerDto`).
@@ -87,16 +87,16 @@ All tests green before moving to Phase 2.
 ### Files to read before starting
 - `references/gis/components/czh-gateway-draw-games-rest-api/src/main/java/com/gtech/esa/gateway/rest/drawgames/dto/FavoriteWagerDTO.java`
 - `references/gis/components/czh-gateway-draw-games-rest-api/src/main/resources/com/gtech/esa/gateway/rest/drawgames/dto/constraints-FavoriteWagerDTO.xml`
-- `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/WagerDto.java` (Phase 1 output)
+- `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/WagerDto.java` (Phase 1 output)
 
 ### Tasks
 
 #### 2.1 — Write `FavouriteWagerDto.java`
 
-**Path:** `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteWagerDto.java`
+**Path:** `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavouriteWagerDto.java`
 
 Rules:
-- Package: `cz.bsl.czh.favourites.api`
+- Package: `cz.bsl.czh.favorites.api`
 - Remove all JAX-RS, `org.codehaus.jackson`, Joda Time, Hibernate Validator imports
 - Fields (from migration plan DTO mapping table):
   - `id` — `Long` (null on create, set on read)
@@ -114,9 +114,9 @@ Rules:
 
 #### 2.2 — Write `FavouriteWagerDtoTest.java`
 
-**Path:** `czh-favorites-api/src/test/java/cz/bsl/czh/favourites/api/FavouriteWagerDtoTest.java`
+**Path:** `czh-favorites-api/src/test/java/cz/bsl/czh/favorites/api/FavouriteWagerDtoTest.java`
 
-Use `new ObjectMapper().registerModule(new JavaTimeModule())`. Add
+Use `new ObjectMapper().registerModule(new JavaTimeModule())`. avorites
 `jackson-datatype-jsr310` test dependency to `czh-favorites-api/pom.xml` if not already there
 (it is in the root BOM — just add scope test).
 
@@ -144,13 +144,13 @@ Tests:
 
 ### Files to read before starting
 - `references/gis/components/czh-gateway-draw-games-rest-api/src/main/java/com/gtech/esa/gateway/rest/drawgames/dto/FavoriteWagerGroupDTO.java`
-- `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteWagerDto.java` (Phase 2 output — for style consistency)
+- `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavouriteWagerDto.java` (Phase 2 output — for style consistency)
 
 ### Tasks
 
 #### 3.1 — Write `FavouriteGroupDto.java`
 
-**Path:** `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteGroupDto.java`
+**Path:** `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavouriteGroupDto.java`
 
 Fields:
 - `id` — `Long` (null on create)
@@ -165,7 +165,7 @@ Same Jackson 2 / `java.time` conventions as `FavouriteWagerDto`. `@JsonIgnorePro
 
 #### 3.2 — Write `FavouriteGroupDtoTest.java`
 
-**Path:** `czh-favorites-api/src/test/java/cz/bsl/czh/favourites/api/FavouriteGroupDtoTest.java`
+**Path:** `czh-favorites-api/src/test/java/cz/bsl/czh/favorites/api/FavouriteGroupDtoTest.java`
 
 Tests:
 - `fullRoundTrip`: all fields set including both timestamps
@@ -188,14 +188,14 @@ Tests:
 ### Files to read before starting
 - `references/gis/components/czh-gateway-draw-games-rest-api/src/main/java/com/gtech/esa/gateway/rest/drawgames/dto/FavoriteWagerPageDTO.java`
 - `references/gis/components/czh-gateway-draw-games-rest-api/src/main/java/com/gtech/esa/gateway/rest/drawgames/dto/FavoriteWagerGroupPageDTO.java`
-- `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteWagerDto.java`
-- `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteGroupDto.java`
+- `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavouriteWagerDto.java`
+- `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavouriteGroupDto.java`
 
 ### Tasks
 
 #### 4.1 — Write `FavouriteWagerPageDto.java`
 
-**Path:** `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteWagerPageDto.java`
+**Path:** `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavouriteWagerPageDto.java`
 
 Fields:
 - `items` — `List<FavouriteWagerDto>`
@@ -205,7 +205,7 @@ Fields:
 
 #### 4.2 — Write `FavouriteGroupPageDto.java`
 
-**Path:** `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/FavouriteGroupPageDto.java`
+**Path:** `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavouriteGroupPageDto.java`
 
 Fields:
 - `items` — `List<FavouriteGroupDto>`
@@ -215,7 +215,7 @@ Same conventions.
 
 #### 4.3 — Write page DTO tests
 
-Add tests to `FavouriteWagerDtoTest` or write `FavouriteWagerPageDtoTest.java` — either is fine.
+avorites tests to `FavouriteWagerDtoTest` or write `FavouriteWagerPageDtoTest.java` — either is fine.
 
 Tests (both page types):
 - `pageWithItemsRoundTrip`: page with 2 items, `totalCount = 2` → round-trip → assert
@@ -278,7 +278,7 @@ Re-run `./mvn.sh -pl czh-favorites-api test` after any change.
 
 #### 5.5 — Routing map
 
-Run `/routing-map` to record the new `cz.bsl.czh.favourites.api` package in
+Run `/routing-map` to record the new `cz.bsl.czh.favorites.api` package in
 `.requirements/design/routing.md`.
 
 #### 5.6 — Write progress state

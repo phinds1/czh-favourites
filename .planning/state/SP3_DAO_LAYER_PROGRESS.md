@@ -3,9 +3,9 @@
 | Phase | Description                                                              | Status   |
 |-------|--------------------------------------------------------------------------|----------|
 | 1     | Write delta scripts (`001-create-gis-fav-group.sql`, `002-create-gis-fav-wager.sql`) | complete |
-| 2     | Write `FavouriteGroupRecord`, `FavouritesGroupDao`, `FavouritesGroupDaoImpl` | complete |
-| 3     | Write `FavouriteWagerRecord`, `FavouritesWagerDao`, `FavouritesWagerDaoImpl` | complete |
-| 4     | Write `DaoTestConfig`, `dao-test-schema.sql`, `FavouritesGroupDaoTest`, `FavouritesWagerDaoTest` | complete |
+| 2     | Write `FavouriteGroupRecord`, `FavoritesGroupDao`, `FavoritesGroupDaoImpl` | complete |
+| 3     | Write `FavouriteWagerRecord`, `FavoritesWagerDao`, `FavoritesWagerDaoImpl` | complete |
+| 4     | Write `DaoTestConfig`, `dao-test-schema.sql`, `FavoritesGroupDaoTest`, `FavoritesWagerDaoTest` | complete |
 | 5     | Post-SP sign-off: test → coverage → security → refactor → routing map    | complete |
 
 ## Notes

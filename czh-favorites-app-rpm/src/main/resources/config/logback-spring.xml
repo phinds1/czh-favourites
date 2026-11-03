@@ -23,7 +23,7 @@
         <appender-ref ref="FILE"/>
     </root>
 
-    <logger name="cz.bsl.favourites" level="DEBUG"/>
-    <logger name="cz.bsl.czh.favourites" level="DEBUG"/>
+    <logger name="cz.bsl.favorites" level="DEBUG"/>
+    <logger name="cz.bsl.czh.favorites" level="DEBUG"/>
 
 </configuration>

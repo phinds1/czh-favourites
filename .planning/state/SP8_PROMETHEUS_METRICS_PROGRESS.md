@@ -2,6 +2,6 @@
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| 1 | FavouritesMetrics bean + unit tests | pending |
-| 2 | Wire metrics into DefaultFavouritesService | pending |
+| 1 | FavoritesMetrics bean + unit tests | pending |
+| 2 | Wire metrics into DefaultFavoritesService | pending |
 | 3 | Integration smoke test + sign-off | pending |

@@ -1,12 +1,12 @@
 /* global GisApi, GisGui */
 /* player-lookup.js — admin player lookup tab.
- * Calls /admin/favourites/players/{id}/wagers and /groups on submit.
+ * Calls /admin/v1/player/{id}/draw-games/favorite-wagers/wagers and /groups on submit.
  * Renders wager count, group count, and a table of wager name + game name.
  *
  * The tab does NOT auto-refresh — it is user-initiated only. The render function
  * builds the form once (built flag) and returns on subsequent auto-refresh ticks.
  *
- * Grep anchor: favourites
+ * Grep anchor: favorites
  */
 (function () {
     var built = false;
@@ -18,7 +18,7 @@
         if (!built) {
             pane.innerHTML =
                 '<p class="snapshot-section">Player Lookup</p>' +
-                '<p class="text-secondary small mb-2">Enter a player ID to view their favourite wagers and groups via the admin API.</p>' +
+                '<p class="text-secondary small mb-2">Enter a player ID to view their favorite wagers and groups via the admin API.</p>' +
                 '<div class="d-flex gap-2 mb-3">' +
                   '<input id="player-id-input" type="text" ' +
                     'class="form-control form-control-sm bg-black border-secondary font-monospace text-success" ' +
@@ -47,7 +47,7 @@
 
             built = true;
         }
-        // No auto-refresh behaviour — the tab is user-driven only
+        // No auto-refresh behavior — the tab is user-driven only
     }
 
     async function doLookup(playerId) {
@@ -56,8 +56,8 @@
 
         var encoded = encodeURIComponent(playerId);
         var res = await Promise.allSettled([
-            GisApi.get('/admin/favourites/players/' + encoded + '/wagers'),
-            GisApi.get('/admin/favourites/players/' + encoded + '/groups')
+            GisApi.get('/admin/v1/player/' + encoded + '/draw-games/favorite-wagers/wagers'),
+            GisApi.get('/admin/v1/player/' + encoded + '/draw-games/favorite-wagers/groups')
         ]);
 
         var wagersOk = res[0].status === 'fulfilled';
@@ -97,7 +97,7 @@
                     '<thead><tr><th>Wager Name</th><th>Game</th><th>Group</th></tr></thead>' +
                     '<tbody>' + rows + '</tbody>' +
                   '</table>'
-                : '<p class="text-secondary small">No favourite wagers for this player.</p>');
+                : '<p class="text-secondary small">No favorite wagers for this player.</p>');
     }
 
     function escHtml(s) {

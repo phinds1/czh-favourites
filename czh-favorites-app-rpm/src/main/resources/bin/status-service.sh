@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-pid_file=/var/run/czh/czh-favorites.pid
+pid_file=/var/run/czh/favorites.pid
 
 if [[ -f $pid_file ]]
 then

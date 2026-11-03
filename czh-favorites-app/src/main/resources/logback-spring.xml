@@ -8,9 +8,9 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/log/gtech/favourites/favourites.log</file>
+        <file>/var/log/gtech/favorites/favorites.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/var/log/gtech/favourites/favourites.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/var/log/gtech/favorites/favorites.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
@@ -29,7 +29,7 @@
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
-        <logger name="cz.bsl.favourites" level="DEBUG"/>
+        <logger name="cz.bsl.favorites" level="DEBUG"/>
     </springProfile>
 
 </configuration>

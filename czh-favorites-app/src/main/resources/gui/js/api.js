@@ -1,13 +1,13 @@
-/* api.js — fetch helpers. czh-favourites is not internet-facing; no auth on the GUI (the management
+/* api.js — fetch helpers. czh-favorites is not internet-facing; no auth on the GUI (the management
  * port serves read-only ops data + the actuator; the GUI's admin fetches go to the app port through
  * the nginx proxy under the GUI's own context).
  *
  * Context-root model: the GUI may sit behind an nginx reverse proxy under a context root
- * (e.g. /favourites-mgmt). nginx routes every GUI request — /gui assets, /admin calls, /actuator —
+ * (e.g. /favorites-mgmt). nginx routes every GUI request — /gui assets, /admin calls, /actuator —
  * under that one context, so the browser makes only same-origin fetches (no cross-port, no CORS).
  * The backend reads nginx's X-Vision-Base request header and fills <meta name="vision-base">
  * in the HTML; resolveUrl() reads that meta once at load and prefixes every absolute site path
- * with it. No meta (GUI loaded direct on its own port at /gui/) → base '' → today's behaviour. */
+ * with it. No meta (GUI loaded direct on its own port at /gui/) → base '' → today's behavior. */
 window.GisApi = (function () {
     /* The context root the GUI was loaded under, read once from the <meta name="vision-base"> tag
      * the backend injects. Empty when the GUI is served direct on its own port (no nginx) →

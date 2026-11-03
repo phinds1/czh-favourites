@@ -13,7 +13,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>czh-favorites-api</artifactId>
     <packaging>jar</packaging>
-    <description>czh-favourites JSON API — request/response DTOs, plain-Java validation</description>
+    <description>czh-favorites JSON API — request/response DTOs, plain-Java validation</description>
 
     <dependencies>
         <!-- Jackson annotations for DTO serialization -->

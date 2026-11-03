@@ -8,7 +8,7 @@ spring:
     username: gtkinst1
     password: gtkinst1
     hikari:
-      pool-name: FavouritesTestPool
+      pool-name: FavoritesTestPool
   sql:
     init:
       mode: never
@@ -35,4 +35,4 @@ management:
 logging:
   level:
     root: WARN
-    cz.bsl.favourites: DEBUG
+    cz.bsl.favorites: DEBUG

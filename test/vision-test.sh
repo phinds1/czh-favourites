@@ -47,13 +47,13 @@ nginx_bin=${nginx_bin_override:-${NGINX_BIN:-$default_nginx_bin}}
 app_module="$project_root/czh-favorites-app"
 test_classes="$app_module/target/test-classes"
 classpath_file="$app_module/target/vision-classpath.txt"
-harness_main=cz.bsl.czh.favourites.test.VisionHarnessMain
+harness_main=cz.bsl.czh.favorites.test.VisionHarnessMain
 mvn_profiles=${VISION_MVN_PROFILES:-github-ci}
 # ./mvn.sh points at a non-existent maven dir; use the real one directly.
 export JAVA_HOME=/opt/jdk-25
 export PATH=$PATH:/opt/apache-maven-3.9.6/bin:$JAVA_HOME/bin
 
-# Favourites' fixed prod ports (application.yml): app 9290, management 9291.
+# Favorites' fixed prod ports (application.yml): app 9290, management 9291.
 APP_PORT=9290
 MGMT_PORT=9291
 
@@ -101,7 +101,7 @@ fi
 
 # --- build the app module test classpath ----------------------------------------
 # The app cannot run as a bare java -jar: production uses DB2, while the harness needs the test
-# classpath (HSQLDB + the test schema). VisionHarnessMain boots FavouritesApplication on the fixed
+# classpath (HSQLDB + the test schema). VisionHarnessMain boots FavoritesApplication on the fixed
 # ports with the test profile; the schema is loaded via spring.sql.init (set in the harness main).
 if [[ ! -d "$test_classes" || ! -f "$classpath_file" || ! -d "$app_module/target/classes" ]]
 then
@@ -153,19 +153,20 @@ then
 fi
 pass "Java backend up (app $APP_PORT, mgmt $MGMT_PORT)"
 
-# --- seed a favourite wager so the GUI admin lookup + Operations tab have data ---
+# --- seed a favorite wager so the GUI admin lookup + Operations tab have data ---
 # POST a group then a wager for a known player via the APP port (direct, X-Player-Id header).
+# Paths follow the legacy GIS contract (gateway-paths.md): /{version}/draw-games/favorite-wagers/...
 seed_player=vision-seed-player
-info "Seeding a favourite wager for $seed_player"
+info "Seeding a favorite wager for $seed_player"
 seed_group_body='{"groupNumber":"5","groupName":"Vision Seed Group"}'
-curl -s -o /dev/null -w '%{http_code}' -X POST "http://127.0.0.1:$APP_PORT/favourites/groups" \
+curl -s -o /dev/null -w '%{http_code}' -X POST "http://127.0.0.1:$APP_PORT/v1/draw-games/favorite-wagers/groups" \
     -H 'Content-Type: application/json' -H "X-Player-Id: $seed_player" \
     -d "$seed_group_body" >/dev/null
 seed_wager_body='{"groupNumber":"5","wagerName":"Vision Seed Wager","wager":{"gameName":"LOTTO","stake":1,"price":1,"duration":1,"serialNumber":"VIS1","boards":[[1,2,3]]}}'
-curl -s -o /dev/null -w '%{http_code}' -X POST "http://127.0.0.1:$APP_PORT/favourites/wagers" \
+curl -s -o /dev/null -w '%{http_code}' -X POST "http://127.0.0.1:$APP_PORT/v1/draw-games/favorite-wagers/wagers" \
     -H 'Content-Type: application/json' -H "X-Player-Id: $seed_player" \
     -d "$seed_wager_body" >/dev/null
-pass "Seeded favourite wager for $seed_player"
+pass "Seeded favorite wager for $seed_player"
 
 # --- resolve the nginx config into a temp copy of the fixture --------------------
 # envsubst is not always installed; sed replaces only the fixture's own placeholders. The $host /
@@ -263,37 +264,37 @@ assert_header_absent() {
 }
 
 # 1. GUI index.html under the management context: meta rewritten, frame-loadable.
-assert_status $base_url/favourites-mgmt/gui/index.html 200 "GET /favourites-mgmt/gui/index.html"
-assert_body_contains $base_url/favourites-mgmt/gui/index.html '<meta name="vision-base" content="/favourites-mgmt">' "meta injection"
-assert_body_contains $base_url/favourites-mgmt/gui/index.html '="/favourites-mgmt/gui/js/api.js"' "asset path rebased under context root"
-assert_header_absent $base_url/favourites-mgmt/gui/index.html X-Frame-Options "no X-Frame-Options (frame-loadable)"
+assert_status $base_url/favorites-mgmt/gui/index.html 200 "GET /favorites-mgmt/gui/index.html"
+assert_body_contains $base_url/favorites-mgmt/gui/index.html '<meta name="vision-base" content="/favorites-mgmt">' "meta injection"
+assert_body_contains $base_url/favorites-mgmt/gui/index.html '="/favorites-mgmt/gui/js/api.js"' "asset path rebased under context root"
+assert_header_absent $base_url/favorites-mgmt/gui/index.html X-Frame-Options "no X-Frame-Options (frame-loadable)"
 
 # 2. GUI JS asset served under the context root (proves the asset path resolves through nginx).
 #    JS is NOT rewritten (resolveUrl reads the meta at runtime) — assert the base is absent in it.
-assert_status $base_url/favourites-mgmt/gui/js/api.js 200 "GET /favourites-mgmt/gui/js/api.js"
-assert_body_contains $base_url/favourites-mgmt/gui/js/api.js resolveUrl "api.js served under context root"
-assert_body_absent $base_url/favourites-mgmt/gui/js/api.js "/favourites-mgmt/gui/" "api.js not rewritten (JS reads meta at runtime)"
+assert_status $base_url/favorites-mgmt/gui/js/api.js 200 "GET /favorites-mgmt/gui/js/api.js"
+assert_body_contains $base_url/favorites-mgmt/gui/js/api.js resolveUrl "api.js served under context root"
+assert_body_absent $base_url/favorites-mgmt/gui/js/api.js "/favorites-mgmt/gui/" "api.js not rewritten (JS reads meta at runtime)"
 
 # 3. Bare context root under the GUI's context: filter serves the index directly (rewritten).
-assert_status $base_url/favourites-mgmt/ 200 "GET /favourites-mgmt/ (root, direct-served)"
-assert_body_contains $base_url/favourites-mgmt/ '<meta name="vision-base" content="/favourites-mgmt">' "root index meta injected"
+assert_status $base_url/favorites-mgmt/ 200 "GET /favorites-mgmt/ (root, direct-served)"
+assert_body_contains $base_url/favorites-mgmt/ '<meta name="vision-base" content="/favorites-mgmt">' "root index meta injected"
 
-# 4. Admin API through the GUI's context (/favourites-mgmt/admin -> app port 9290). The admin
+# 4. Admin API through the GUI's context (/favorites-mgmt/admin -> app port 9290). The admin
 #    wagers endpoint needs no X-Player-Id header (playerId is a path param); it returns JSON with
 #    items + totalCount. The GUI fetches /admin through its own context, which routes to the app port.
-assert_status "$base_url/favourites-mgmt/admin/favourites/players/$seed_player/wagers" 200 "GET /favourites-mgmt/admin wagers (GUI's admin context)"
-assert_body_contains "$base_url/favourites-mgmt/admin/favourites/players/$seed_player/wagers" '"totalCount"' "GUI-context admin wagers JSON"
-# The bare /favourites/ context also routes to the app port (direct/cron access).
-assert_status "$base_url/favourites/admin/favourites/players/$seed_player/groups" 200 "GET /favourites/admin groups (direct app context)"
-assert_body_contains "$base_url/favourites/admin/favourites/players/$seed_player/groups" '"totalCount"' "direct-context admin groups JSON"
+assert_status "$base_url/favorites-mgmt/admin/v1/player/$seed_player/draw-games/favorite-wagers/wagers" 200 "GET /favorites-mgmt/admin wagers (GUI's admin context)"
+assert_body_contains "$base_url/favorites-mgmt/admin/v1/player/$seed_player/draw-games/favorite-wagers/wagers" '"totalCount"' "GUI-context admin wagers JSON"
+# The bare /favorites/ context also routes to the app port (direct/cron access).
+assert_status "$base_url/favorites/admin/v1/player/$seed_player/draw-games/favorite-wagers/groups" 200 "GET /favorites/admin groups (direct app context)"
+assert_body_contains "$base_url/favorites/admin/v1/player/$seed_player/draw-games/favorite-wagers/groups" '"totalCount"' "direct-context admin groups JSON"
 
 # 5. Actuator health through the management context.
-assert_status $base_url/favourites-mgmt/actuator/health 200 "GET /favourites-mgmt/actuator/health"
-assert_body_contains $base_url/favourites-mgmt/actuator/health '"status":"UP"' "actuator health UP"
+assert_status $base_url/favorites-mgmt/actuator/health 200 "GET /favorites-mgmt/actuator/health"
+assert_body_contains $base_url/favorites-mgmt/actuator/health '"status":"UP"' "actuator health UP"
 
 # 6. Actuator prometheus through the management context (the Server/Operations tabs' source).
-assert_status $base_url/favourites-mgmt/actuator/prometheus 200 "GET /favourites-mgmt/actuator/prometheus"
-assert_body_contains $base_url/favourites-mgmt/actuator/prometheus 'process_uptime_seconds' "prometheus has uptime gauge"
+assert_status $base_url/favorites-mgmt/actuator/prometheus 200 "GET /favorites-mgmt/actuator/prometheus"
+assert_body_contains $base_url/favorites-mgmt/actuator/prometheus 'process_uptime_seconds' "prometheus has uptime gauge"
 
 # --- nginx crash check (no worker exits in error.log) ---------------------------
 header "Crash check — no worker exits in nginx error.log"
@@ -322,9 +323,9 @@ then
     echo ""
     echo "=============================================================="
     echo "Vision GUI is up behind nginx. Open in a browser:"
-    echo "  GUI (management context): http://localhost:$port/favourites-mgmt/gui/index.html"
-    echo "  Admin wagers API:         http://localhost:$port/favourites/admin/favourites/players/$seed_player/wagers"
-    echo "  Actuator health:          http://localhost:$port/favourites-mgmt/actuator/health"
+    echo "  GUI (management context): http://localhost:$port/favorites-mgmt/gui/index.html"
+    echo "  Admin wagers API:         http://localhost:$port/favorites/admin/v1/player/$seed_player/draw-games/favorite-wagers/wagers"
+    echo "  Actuator health:          http://localhost:$port/favorites-mgmt/actuator/health"
     echo "  Press ENTER here to shut everything down."
     echo "=============================================================="
     read -r _ </dev/tty || true

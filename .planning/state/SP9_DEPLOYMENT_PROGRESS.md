@@ -12,9 +12,9 @@
 ### Phase 4 — Sign-off
 
 Files for review:
-- `/java/czh/czh-favourites/.azuredevops/non-production/maven/maven-build-develop-branch.yaml`
-- `/java/czh/czh-favourites/.azuredevops/non-production/maven/maven-build-pull-request.yaml`
-- `/java/czh/czh-favourites/.azuredevops/non-production/maven/maven-build-release-action-branch.yaml`
-- `/java/czh/czh-favourites/.azuredevops/non-production/maven/maven-dependency-submission.yaml`
-- `/java/czh/czh-favourites/.azuredevops/non-production/maven/update-dependencies-to-release-pr.yaml`
-- `/java/czh/czh-favourites/.azuredevops/non-production/maven/update-target-branch-version-pr.yaml`
+- `/java/czh/czh-favorites/.azuredevops/non-production/maven/maven-build-develop-branch.yaml`
+- `/java/czh/czh-favorites/.azuredevops/non-production/maven/maven-build-pull-request.yaml`
+- `/java/czh/czh-favorites/.azuredevops/non-production/maven/maven-build-release-action-branch.yaml`
+- `/java/czh/czh-favorites/.azuredevops/non-production/maven/maven-dependency-submission.yaml`
+- `/java/czh/czh-favorites/.azuredevops/non-production/maven/update-dependencies-to-release-pr.yaml`
+- `/java/czh/czh-favorites/.azuredevops/non-production/maven/update-target-branch-version-pr.yaml`

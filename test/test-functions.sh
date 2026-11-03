@@ -66,7 +66,7 @@ FAILED=0
 FAILURES=0
 
 #
-# Colour helpers  (silent no-ops when stdout is not a terminal)
+# Color helpers  (silent no-ops when stdout is not a terminal)
 #
 BOLD=$(tput bold   2>/dev/null || true)
 GREEN=$(tput setaf 2 2>/dev/null || true)

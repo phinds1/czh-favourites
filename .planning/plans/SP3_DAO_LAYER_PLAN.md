@@ -1,14 +1,14 @@
 # SP3: DAO Layer — Detailed Implementation Plan
 
 **Sub-plan:** SP3 of 10  
-**Sanename:** `favourites`  
-**Root package:** `cz.bsl.czh.favourites`  
+**Sanename:** `favorites`  
+**Root package:** `cz.bsl.czh.favorites`  
 **Progress state:** `.planning/state/SP3_DAO_LAYER_PROGRESS.md`
 
 ## Overview
 
-Write two db2delta scripts for `czh-favorites-db`, then implement `FavouritesGroupDao` and
-`FavouritesWagerDao` in `czh-favorites-app` using `JdbcTemplate`. All SQL is declared as named
+Write two db2delta scripts for `czh-favorites-db`, then implement `FavoritesGroupDao` and
+`FavoritesWagerDao` in `czh-favorites-app` using `JdbcTemplate`. All SQL is declared as named
 `private static final String` constants. The wager DAO stores and retrieves the raw `WAGER_JSON`
 string; the caller (service layer, SP5) owns `ObjectMapper` round-trips. Each DAO has a JUnit 5
 test against an H2 in-memory database. The SP is done when all tests pass and
@@ -99,10 +99,10 @@ No test for delta scripts in this phase — they are verified by the H2 schema t
 
 ---
 
-## Phase 2 — Write `FavouritesGroupDao`
+## Phase 2 — Write `FavoritesGroupDao`
 
 ### Goal
-`FavouritesGroupDaoImpl` compiles cleanly and all six DAO methods are implemented.
+`FavoritesGroupDaoImpl` compiles cleanly and all six DAO methods are implemented.
 
 ### Files to read before starting
 - `/java/czh/czh-money/money-app/src/main/java/cz/bsl/money/dao/CzhPaymentDao.java`
@@ -114,7 +114,7 @@ No test for delta scripts in this phase — they are verified by the H2 schema t
 
 #### 2.1 — Write `FavouriteGroupRecord.java`
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouriteGroupRecord.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavouriteGroupRecord.java`
 
 Plain Java domain object (not a DTO — no Jackson annotations):
 - `favGroupId` — `Long` (null before insert; set after)
@@ -127,12 +127,12 @@ Plain Java domain object (not a DTO — no Jackson annotations):
 
 Standard getters/setters. No-arg constructor.
 
-#### 2.2 — Write `FavouritesGroupDao.java` (interface)
+#### 2.2 — Write `FavoritesGroupDao.java` (interface)
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouritesGroupDao.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesGroupDao.java`
 
 ```java
-public interface FavouritesGroupDao {
+public interface FavoritesGroupDao {
     /** Insert; returns generated FAV_GROUP_ID. Throws DuplicateKeyException on duplicate (PLAYER_ID, GROUP_NUMBER). */
     long insert(FavouriteGroupRecord group);
 
@@ -153,9 +153,9 @@ public interface FavouritesGroupDao {
 }
 ```
 
-#### 2.3 — Write `FavouritesGroupDaoImpl.java`
+#### 2.3 — Write `FavoritesGroupDaoImpl.java`
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouritesGroupDaoImpl.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesGroupDaoImpl.java`
 
 Follow `CzhPaymentDaoImpl` exactly:
 - `@Repository`
@@ -200,21 +200,21 @@ and returns null — same as `CzhPaymentDaoImpl.findById`.
 
 ---
 
-## Phase 3 — Write `FavouritesWagerDao`
+## Phase 3 — Write `FavoritesWagerDao`
 
 ### Goal
-`FavouritesWagerDaoImpl` compiles cleanly and all eight DAO methods are implemented.
+`FavoritesWagerDaoImpl` compiles cleanly and all eight DAO methods are implemented.
 
 ### Files to read before starting
 - `/java/czh/czh-money/money-app/src/main/java/cz/bsl/money/dao/CzhPaymentDaoImpl.java`
 - `czh-favorites-db/src/main/delta/002-create-gis-fav-wager.sql` (column names, indexes)
-- `czh-favorites-api/src/main/java/cz/bsl/czh/favourites/api/WagerDto.java` (SP2 — for Javadoc)
+- `czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/WagerDto.java` (SP2 — for Javadoc)
 
 ### Tasks
 
 #### 3.1 — Write `FavouriteWagerRecord.java`
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouriteWagerRecord.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavouriteWagerRecord.java`
 
 Plain Java domain object:
 - `favWagerId` — `Long` (null before insert)
@@ -229,12 +229,12 @@ Plain Java domain object:
 
 Standard getters/setters. No-arg constructor.
 
-#### 3.2 — Write `FavouritesWagerDao.java` (interface)
+#### 3.2 — Write `FavoritesWagerDao.java` (interface)
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouritesWagerDao.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesWagerDao.java`
 
 ```java
-public interface FavouritesWagerDao {
+public interface FavoritesWagerDao {
     /** Insert; returns generated FAV_WAGER_ID. */
     long insert(FavouriteWagerRecord wager);
 
@@ -261,9 +261,9 @@ public interface FavouritesWagerDao {
 }
 ```
 
-#### 3.3 — Write `FavouritesWagerDaoImpl.java`
+#### 3.3 — Write `FavoritesWagerDaoImpl.java`
 
-**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouritesWagerDaoImpl.java`
+**Path:** `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesWagerDaoImpl.java`
 
 - `@Repository`
 - Constructor-inject `JdbcTemplate jdbcTemplate`
@@ -316,11 +316,11 @@ including `WAGER_JSON` as a plain `String`.
 ## Phase 4 — Write DAO tests
 
 ### Goal
-`FavouritesGroupDaoTest` and `FavouritesWagerDaoTest` pass against H2 in-memory.
+`FavoritesGroupDaoTest` and `FavoritesWagerDaoTest` pass against H2 in-memory.
 
 ### Files to read before starting
-- `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouritesGroupDaoImpl.java`
-- `czh-favorites-app/src/main/java/cz/bsl/czh/favourites/dao/FavouritesWagerDaoImpl.java`
+- `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesGroupDaoImpl.java`
+- `czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesWagerDaoImpl.java`
 - `czh-favorites-app/src/test/resources/application-test.yml` (H2 datasource properties — from SP1)
 - `/java/czh/czh-money/money-app/src/test/java/cz/bsl/money/dao/CzhPaymentDaoCrudTest.java` (test style reference)
 
@@ -335,10 +335,10 @@ and db2delta headers).
 
 #### 4.2 — Write shared test database config
 
-**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/dao/DaoTestConfig.java`
+**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/dao/DaoTestConfig.java`
 
 ```java
-// @Configuration — shared by FavouritesGroupDaoTest and FavouritesWagerDaoTest
+// @Configuration — shared by FavoritesGroupDaoTest and FavoritesWagerDaoTest
 // Beans: DataSource (H2 in-memory, DB_CLOSE_DELAY=-1), JdbcTemplate, ObjectMapper
 // @PostConstruct or CommandLineRunner: runs CREATE TABLE statements for GIS_FAV_GROUP and GIS_FAV_WAGER
 // Use GENERATED BY DEFAULT AS IDENTITY for H2 compatibility
@@ -376,11 +376,11 @@ CREATE TABLE GIS_FAV_WAGER (
 );
 ```
 
-#### 4.3 — Write `FavouritesGroupDaoTest.java`
+#### 4.3 — Write `FavoritesGroupDaoTest.java`
 
-**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/dao/FavouritesGroupDaoTest.java`
+**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/dao/FavoritesGroupDaoTest.java`
 
-Use `@SpringJUnitConfig(DaoTestConfig.class)`. Inject `FavouritesGroupDaoImpl` directly (or the
+Use `@SpringJUnitConfig(DaoTestConfig.class)`. Inject `FavoritesGroupDaoImpl` directly (or the
 interface — wire a bean in `DaoTestConfig`). Each test starts with a clean table (use
 `@BeforeEach` to `DELETE FROM GIS_FAV_GROUP`).
 
@@ -394,9 +394,9 @@ Tests:
 - `delete_removesRow`: insert, delete, findByPlayer → empty list
 - `countByPlayer_countsOnlyTargetPlayer`: insert 3 for player A, 1 for player B; countByPlayer(A) = 3
 
-#### 4.4 — Write `FavouritesWagerDaoTest.java`
+#### 4.4 — Write `FavoritesWagerDaoTest.java`
 
-**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favourites/dao/FavouritesWagerDaoTest.java`
+**Path:** `czh-favorites-app/src/test/java/cz/bsl/czh/favorites/dao/FavoritesWagerDaoTest.java`
 
 Same setup as group test. Each test `@BeforeEach` deletes from `GIS_FAV_WAGER`.
 
@@ -475,7 +475,7 @@ Re-run `./mvn.sh -pl czh-favorites-app test` after any change.
 
 #### 5.5 — Routing map
 
-Run `/routing-map` to add the new `cz.bsl.czh.favourites.dao` package components to
+Run `/routing-map` to add the new `cz.bsl.czh.favorites.dao` package components to
 `.requirements/design/routing.md`.
 
 #### 5.6 — Write progress state

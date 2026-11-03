@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: czh-favourites
+    name: czh-favorites
   jackson:
     default-property-inclusion: non_null
     datatype:
@@ -20,7 +20,7 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-      pool-name: FavouritesHikariPool
+      pool-name: FavoritesHikariPool
 
 management:
   server:
@@ -40,9 +40,9 @@ management:
 logging:
   level:
     root: INFO
-    cz.bsl.favourites: DEBUG
+    cz.bsl.favorites: DEBUG
 
-favourites:
+favorites:
   min-group-index: 1
   max-group-index: 10
   default-group-name: ""

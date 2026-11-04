@@ -39,15 +39,11 @@ class FavoritesRestSmokeTest extends AbstractRestTest {
 
     @Test
     void actuatorPrometheus_exposesFavoritesCounters_afterWagerOp() {
-        // Fire one wager create to populate the favorites_wager_operation_total counter
-        String groupBody = "{\"groupNumber\":\"5\",\"groupName\":\"Prometheus Test Group\"}";
-        restTemplate.exchange("/v1/draw-games/favorite-wagers/groups", org.springframework.http.HttpMethod.POST,
-                new org.springframework.http.HttpEntity<>(groupBody, asPlayer("prometheus-smoke-player")),
-                String.class);
-
-        String wagerBody = "{\"groupNumber\":\"5\",\"wagerName\":\"Prometheus Test\","
-                + "\"wager\":{\"gameName\":\"LOTTO\",\"stake\":1,\"price\":1,\"duration\":1,"
-                + "\"serialNumber\":\"PROM1\",\"boards\":[[1,2,3]]}}";
+        // Fire one wager create (legacy wire shape) to populate the favorites_wager_operation_total counter
+        String wagerBody = "{\"name\":\"Prometheus Test\","
+                + "\"group\":{\"id\":\"5\",\"name\":\"Prometheus Test Group\"},"
+                + "\"wager\":{\"type\":\"NORMAL\",\"gameName\":\"LOTTO\",\"stake\":1,\"price\":1,\"duration\":1,"
+                + "\"serialNumber\":\"PROM1\",\"boards\":[{\"primarySelections\":[\"1\",\"2\",\"3\"]}]}}";
         restTemplate.exchange("/v1/draw-games/favorite-wagers/wagers", org.springframework.http.HttpMethod.POST,
                 new org.springframework.http.HttpEntity<>(wagerBody, asPlayer("prometheus-smoke-player")),
                 String.class);

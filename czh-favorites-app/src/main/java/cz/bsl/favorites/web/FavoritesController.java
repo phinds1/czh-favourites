@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -45,9 +44,7 @@ public class FavoritesController {
     private final PlayerContextResolver playerContext;
     private final FavoritesValidator validator;
 
-    public FavoritesController(FavoritesService service,
-                                PlayerContextResolver playerContext,
-                                FavoritesValidator validator) {
+    public FavoritesController(FavoritesService service, PlayerContextResolver playerContext, FavoritesValidator validator) {
         this.service       = service;
         this.playerContext = playerContext;
         this.validator     = validator;
@@ -57,16 +54,14 @@ public class FavoritesController {
     // Wager endpoints
     // -------------------------------------------------------------------------
 
-    /** POST /{version}/draw-games/favorite-wagers/wagers → 201 Created */
+    /** POST /{version}/draw-games/favorite-wagers/wagers → 200 (legacy contract: 200 + body with string id) */
     @PostMapping("/wagers")
-    public ResponseEntity<FavoriteWagerDto> createWager(
+    public FavoriteWagerDto createWager(
             @PathVariable("version") String version,
             @RequestBody FavoriteWagerDto dto,
             HttpServletRequest request) {
         String playerId = playerContext.resolve(request);
-        FavoriteWagerDto created = service.createWager(dto, playerId);
-        URI location = URI.create("/" + version + "/draw-games/favorite-wagers/wagers/" + created.getId());
-        return ResponseEntity.created(location).body(created);
+        return service.createWager(dto, playerId);
     }
 
     /** GET /{version}/draw-games/favorite-wagers/wagers/{id} → 200 */
@@ -117,16 +112,14 @@ public class FavoritesController {
     // Group endpoints
     // -------------------------------------------------------------------------
 
-    /** POST /{version}/draw-games/favorite-wagers/groups → 201 Created */
+    /** POST /{version}/draw-games/favorite-wagers/groups → 200 (legacy contract: 200 + body with string id) */
     @PostMapping("/groups")
-    public ResponseEntity<FavoriteGroupDto> createGroup(
+    public FavoriteGroupDto createGroup(
             @PathVariable("version") String version,
             @RequestBody FavoriteGroupDto dto,
             HttpServletRequest request) {
         String playerId = playerContext.resolve(request);
-        FavoriteGroupDto created = service.createGroup(dto, playerId);
-        URI location = URI.create("/" + version + "/draw-games/favorite-wagers/groups/" + created.getGroupNumber());
-        return ResponseEntity.created(location).body(created);
+        return service.createGroup(dto, playerId);
     }
 
     /** GET /{version}/draw-games/favorite-wagers/groups/{id} → 200 ({id} is the group number) */

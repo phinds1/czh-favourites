@@ -1,4 +1,6 @@
+// Legacy list wrapper (gisorch FavoriteWagerPageDTO): items in favoriteWagers;
+// totalCount is the favorites-only additive attribute.
 jsonDefinition = {
-  items:      notNull(),
-  totalCount: notNull()
+  favoriteWagers: notNull(),
+  totalCount:      notNull()
 };

@@ -3,7 +3,6 @@ package cz.bsl.favorites.web;
 // Grep anchor: favorites
 
 import cz.bsl.czh.favorites.test.AbstractRestTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -17,8 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Integration tests for the 5 wager endpoints in {@link FavoritesController}.
  * Extends {@link AbstractRestTest} — boots the full Spring context on a random port.
  *
- * <p>Each test is self-contained: {@code @BeforeEach} creates a group so wager CRUD can proceed.
- * DB is shared across the test run (HSQLDB persistent connection) so player IDs are unique per test.
+ * <p>Legacy front-end contract (gisorch): POST returns 200 with a string {@code id}; the
+ * body carries {@code name}, {@code group {id, name}} and the full wager structure; a
+ * group referenced by id that does not exist yet is created on the fly.
  */
 class FavoritesWagerControllerTest extends AbstractRestTest {
 
@@ -26,49 +26,61 @@ class FavoritesWagerControllerTest extends AbstractRestTest {
     private static final String GROUP  = "1";
     private static final String GAME   = "LOTTO";
 
-    @BeforeEach
-    void seedGroup() {
-        String body = "{\"groupNumber\":\"" + GROUP + "\",\"groupName\":\"Test Group\"}";
-        ResponseEntity<String> resp = restTemplate.exchange(
-                "/v1/draw-games/favorite-wagers/groups",
-                HttpMethod.POST,
-                new HttpEntity<>(body, asPlayer(PLAYER)),
-                String.class);
-        // 201 (first run) or 400 duplicate (subsequent runs when context is reused) — both are fine
-        assertTrue(resp.getStatusCode().value() == 201 || resp.getStatusCode().value() == 400,
-                "Group seed returned unexpected status: " + resp.getStatusCode());
-    }
-
-    @Test
-    void createWager_returns201WithBody() {
+    /** POST the legacy sportka-style body; returns the created favorite's string id. */
+    private String createWager() {
         String body = jamcrest.loadJson("favorites/wager/create.req.js",
-                "groupNumber", GROUP,
-                "gameName", GAME);
-
-        ResponseEntity<String> response = restTemplate.exchange(
-                "/v1/draw-games/favorite-wagers/wagers",
-                HttpMethod.POST,
-                new HttpEntity<>(body, asPlayer(PLAYER)),
-                String.class);
-
-        assertEquals(201, response.getStatusCode().value());
-        assertNotNull(response.getHeaders().getLocation());
-        jamcrest.validateJson(response.getBody(), "favorites/wager/create.resp.js");
-    }
-
-    @Test
-    void getWager_returns200WithBody() {
-        String createBody = jamcrest.loadJson("favorites/wager/create.req.js",
                 "groupNumber", GROUP,
                 "gameName", GAME);
         ResponseEntity<String> created = restTemplate.exchange(
                 "/v1/draw-games/favorite-wagers/wagers",
                 HttpMethod.POST,
-                new HttpEntity<>(createBody, asPlayer(PLAYER)),
+                new HttpEntity<>(body, asPlayer(PLAYER)),
                 String.class);
-        assertEquals(201, created.getStatusCode().value());
+        assertEquals(200, created.getStatusCode().value(), "legacy contract: POST returns 200");
         jamcrest.validateJson(created.getBody(), "favorites/wager/create.resp.js");
-        long id = (long) (int) jamcrest.access("$.id");
+        return String.valueOf(jamcrest.access("$.id"));
+    }
+
+    @Test
+    void createWager_returns200WithBody() {
+        String id = createWager();
+
+        assertNotNull(id);
+        assertTrue(Long.parseLong(id) > 0, "id must be the numeric key as a string, got: " + id);
+    }
+
+    @Test
+    void createWager_roundTripsLegacyWager() {
+        String body = jamcrest.loadJson("favorites/wager/create.req.js",
+                "groupNumber", GROUP,
+                "gameName", GAME);
+        ResponseEntity<String> created = restTemplate.exchange(
+                "/v1/draw-games/favorite-wagers/wagers",
+                HttpMethod.POST,
+                new HttpEntity<>(body, asPlayer(PLAYER)),
+                String.class);
+        assertEquals(200, created.getStatusCode().value());
+        jamcrest.validateJson(created.getBody(), "favorites/wager/create.resp.js");
+
+        String id = String.valueOf(jamcrest.access("$.id"));
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/v1/draw-games/favorite-wagers/wagers/" + id,
+                HttpMethod.GET,
+                new HttpEntity<>(asPlayer(PLAYER)),
+                String.class);
+
+        assertEquals(200, response.getStatusCode().value());
+        jamcrest.validateJson(response.getBody(), "favorites/wager/get.resp.js");
+        // the wager round-trips verbatim: boards are objects with primarySelections,
+        // drawNames and type survive
+        assertTrue(response.getBody().contains("primarySelections"), "boards must be board objects");
+        assertTrue(response.getBody().contains("drawNames"), "drawNames must survive");
+        assertTrue(response.getBody().contains("NORMAL"), "type must survive");
+    }
+
+    @Test
+    void getWager_returns200WithBody() {
+        String id = createWager();
 
         ResponseEntity<String> response = restTemplate.exchange(
                 "/v1/draw-games/favorite-wagers/wagers/" + id,
@@ -82,17 +94,7 @@ class FavoritesWagerControllerTest extends AbstractRestTest {
 
     @Test
     void updateWager_returns200WithUpdatedFields() {
-        String createBody = jamcrest.loadJson("favorites/wager/create.req.js",
-                "groupNumber", GROUP,
-                "gameName", GAME);
-        ResponseEntity<String> created = restTemplate.exchange(
-                "/v1/draw-games/favorite-wagers/wagers",
-                HttpMethod.POST,
-                new HttpEntity<>(createBody, asPlayer(PLAYER)),
-                String.class);
-        assertEquals(201, created.getStatusCode().value());
-        jamcrest.validateJson(created.getBody(), "favorites/wager/create.resp.js");
-        long id = (long) (int) jamcrest.access("$.id");
+        String id = createWager();
 
         String updateBody = jamcrest.loadJson("favorites/wager/update.req.js",
                 "groupNumber", GROUP,
@@ -105,22 +107,12 @@ class FavoritesWagerControllerTest extends AbstractRestTest {
 
         assertEquals(200, response.getStatusCode().value());
         jamcrest.validateJson(response.getBody(), "favorites/wager/get.resp.js");
-        assertTrue(response.getBody().contains("Updated Name"), "wagerName should be updated");
+        assertTrue(response.getBody().contains("Updated Name"), "name should be updated");
     }
 
     @Test
     void deleteWager_returns204_thenGet_returns404() {
-        String createBody = jamcrest.loadJson("favorites/wager/create.req.js",
-                "groupNumber", GROUP,
-                "gameName", GAME);
-        ResponseEntity<String> created = restTemplate.exchange(
-                "/v1/draw-games/favorite-wagers/wagers",
-                HttpMethod.POST,
-                new HttpEntity<>(createBody, asPlayer(PLAYER)),
-                String.class);
-        assertEquals(201, created.getStatusCode().value());
-        jamcrest.validateJson(created.getBody(), "favorites/wager/create.resp.js");
-        long id = (long) (int) jamcrest.access("$.id");
+        String id = createWager();
 
         ResponseEntity<String> deleteResp = restTemplate.exchange(
                 "/v1/draw-games/favorite-wagers/wagers/" + id,
@@ -138,18 +130,9 @@ class FavoritesWagerControllerTest extends AbstractRestTest {
     }
 
     @Test
-    void listWagers_returns200PageWithItems() {
-        // Create two wagers
+    void listWagers_returns200PageWithFavoriteWagers() {
         for (int i = 0; i < 2; i++) {
-            String body = jamcrest.loadJson("favorites/wager/create.req.js",
-                    "groupNumber", GROUP,
-                    "gameName", GAME);
-            ResponseEntity<String> resp = restTemplate.exchange(
-                    "/v1/draw-games/favorite-wagers/wagers",
-                    HttpMethod.POST,
-                    new HttpEntity<>(body, asPlayer(PLAYER)),
-                    String.class);
-            assertEquals(201, resp.getStatusCode().value());
+            createWager();
         }
 
         ResponseEntity<String> response = restTemplate.exchange(
@@ -162,5 +145,6 @@ class FavoritesWagerControllerTest extends AbstractRestTest {
         jamcrest.validateJson(response.getBody(), "favorites/wager/list.resp.js");
         int count = (int) jamcrest.access("$.totalCount");
         assertTrue(count >= 2, "Expected at least 2 wagers in list, got: " + count);
+        assertTrue(response.getBody().contains("favoriteWagers"), "legacy list field name");
     }
 }

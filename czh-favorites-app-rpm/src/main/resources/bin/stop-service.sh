@@ -3,7 +3,7 @@
 # Polite stop with SIGTERM
 #
 
-pid_file=/var/run/czh/favorites/.pid
+pid_file=/var/run/czh/favorites.pid
 
 if [[ -f $pid_file ]]
 then

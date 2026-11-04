@@ -166,11 +166,16 @@ class FavoritesWagerDaoTest {
 
     @Test
     void wagerJsonRoundTrip() throws Exception {
-        WagerDto original = new WagerDto("EUROJACKPOT", 250L, 500L, 3, "SN-42",
-                Arrays.asList(
-                        Arrays.asList(7, 14, 21, 28, 35),
-                        Arrays.asList(2, 4, 6, 8, 10)
-                ));
+        WagerDto original = new WagerDto();
+        original.setGameName("EUROJACKPOT");
+        original.setStake(250L);
+        original.setPrice(500L);
+        original.setDuration(3);
+        original.setSerialNumber("SN-42");
+        original.setBoards(List.of(
+                board("7", "14", "21", "28", "35"),
+                board("2", "4", "6", "8", "10")
+        ));
 
         String json = objectMapper.writeValueAsString(original);
         long id = dao.insert(wager("player-1", "1", "EUROJACKPOT", "EJ Fave", json));
@@ -184,7 +189,15 @@ class FavoritesWagerDaoTest {
         assertEquals(original.getPrice(), restored.getPrice());
         assertEquals(original.getDuration(), restored.getDuration());
         assertEquals(original.getSerialNumber(), restored.getSerialNumber());
-        assertEquals(original.getBoards(), restored.getBoards());
+        assertEquals(original.getBoards().size(), restored.getBoards().size());
+        assertEquals(original.getBoards().get(0).getSelections(), restored.getBoards().get(0).getSelections());
+        assertEquals(original.getBoards().get(1).getSelections(), restored.getBoards().get(1).getSelections());
+    }
+
+    private static cz.bsl.czh.favorites.api.BoardDto board(String... selections) {
+        cz.bsl.czh.favorites.api.BoardDto board = new cz.bsl.czh.favorites.api.BoardDto();
+        board.setSelections(List.of(selections));
+        return board;
     }
 
     // -------------------------------------------------------------------------

@@ -1,4 +1,4 @@
+// Legacy front-end group update body (gisorch wire contract): only the name is mutable.
 t = {
-  groupNumber: groupNumber,
-  groupName: "Updated Group Name"
+  name: "Updated Group Name"
 };

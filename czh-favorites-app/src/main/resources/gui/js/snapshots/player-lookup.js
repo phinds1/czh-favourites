@@ -75,11 +75,12 @@
         try { if (wagersOk) wagers = JSON.parse(res[0].value); } catch (e) { /* ignore */ }
         try { if (groupsOk) groups = JSON.parse(res[1].value); } catch (e) { /* ignore */ }
 
-        var rows = (wagers.items || []).map(function (w) {
+        var rows = (wagers.favoriteWagers || []).map(function (w) {
+            var group = w.group || {};
             return '<tr>' +
-                '<td class="font-monospace small">' + escHtml(w.wagerName || '—') + '</td>' +
+                '<td class="font-monospace small">' + escHtml(w.name || '—') + '</td>' +
                 '<td class="font-monospace small text-info">' + escHtml(w.gameName || '—') + '</td>' +
-                '<td class="font-monospace small text-secondary">' + escHtml(String(w.groupNumber || '—')) + '</td>' +
+                '<td class="font-monospace small text-secondary">' + escHtml(String(group.name || group.id || '—')) + '</td>' +
                 '</tr>';
         }).join('');
 

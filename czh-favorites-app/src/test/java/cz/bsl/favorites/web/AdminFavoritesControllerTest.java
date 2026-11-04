@@ -31,27 +31,29 @@ class AdminFavoritesControllerTest extends AbstractRestTest {
 
     @BeforeEach
     void seedData() {
-        // Seed group (idempotent — duplicate returns 400 which we tolerate)
-        String groupBody = "{\"groupNumber\":\"" + GROUP + "\",\"groupName\":\"Admin Test Group\"}";
+        // Seed group via the legacy name-only body (idempotent: duplicate slot -> 400 tolerated)
+        String groupBody = "{\"id\":\"" + GROUP + "\",\"name\":\"Admin Test Group\"}";
         restTemplate.exchange(
                 "/v1/draw-games/favorite-wagers/groups",
                 HttpMethod.POST,
                 new HttpEntity<>(groupBody, asPlayer(ADMIN_TEST_PLAYER)),
                 String.class);
 
-        // Seed wager and capture its id
-        String wagerBody = "{\"groupNumber\":\"" + GROUP + "\",\"wagerName\":\"Admin Test Wager\"," +
-                "\"wager\":{\"gameName\":\"" + GAME + "\",\"stake\":100,\"price\":100,\"duration\":1," +
-                "\"serialNumber\":\"ADMIN-SN1\",\"boards\":[[1,2,3]]}}";
+        // Seed wager and capture its id (legacy contract: 200 + string id)
+        String wagerBody = "{\"name\":\"Admin Test Wager\"," +
+                "\"group\":{\"id\":\"" + GROUP + "\",\"name\":\"Admin Test Group\"}," +
+                "\"wager\":{\"type\":\"NORMAL\",\"gameName\":\"" + GAME + "\",\"stake\":100,\"price\":100," +
+                "\"duration\":1,\"drawNames\":[\"WED\"],\"serialNumber\":\"ADMIN-SN1\"," +
+                "\"boards\":[{\"primarySelections\":[\"1\",\"2\",\"3\"]}]}}";
         ResponseEntity<String> wagerResp = restTemplate.exchange(
                 "/v1/draw-games/favorite-wagers/wagers",
                 HttpMethod.POST,
                 new HttpEntity<>(wagerBody, asPlayer(ADMIN_TEST_PLAYER)),
                 String.class);
 
-        if (wagerResp.getStatusCode().value() == 201) {
+        if (wagerResp.getStatusCode().value() == 200) {
             jamcrest.validateJson(wagerResp.getBody(), "favorites/wager/create.resp.js");
-            seededWagerId = (long) (int) jamcrest.access("$.id");
+            seededWagerId = Long.parseLong(String.valueOf(jamcrest.access("$.id")));
         }
     }
 

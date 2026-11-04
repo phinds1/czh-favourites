@@ -1,9 +1,10 @@
+// Legacy wire shape (gisorch FavoriteWagerDTO) via the admin read path.
 jsonDefinition = {
   id:          notNull(),
+  name:        notNull(),
+  group:       notNull(),
   playerId:    notNull(),
-  groupNumber: notNull(),
   gameName:    notNull(),
-  wagerName:   notNull(),
   flags:       notNull(),
   createdAt:   notNull(),
   wager:       notNull()

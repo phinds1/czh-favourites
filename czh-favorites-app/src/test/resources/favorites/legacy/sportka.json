@@ -1,0 +1,33 @@
+{
+    "name": "Sportka Favorite",
+    "group": {
+        "name": "Sportka Group"
+    },
+    "wager": {
+        "type": "NORMAL",
+        "duration": 3,
+        "drawNames": [ "WED", "FRI", "SUN" ],
+        "gameName": "Sportka",
+        "price": 9000,
+        "addonWagers": [
+            {
+                "gameName": "Sance",
+                "boards": [
+                    {
+                        "quickpick": false,
+                        "primarySelections": [ "1", "2", "3", "4", "5", "6" ]
+                    }
+                ],
+                "addonPlayed": false
+            }
+        ],
+        "boards": [
+            {
+                "systemBetType": "default",
+                "betType": "NORMAL",
+                "quickpick": false,
+                "primarySelections": [ "1", "2", "3", "4", "5", "6" ]
+            }
+        ]
+    }
+}

@@ -1,10 +1,21 @@
+// Legacy wire shape (gisorch FavoriteWagerDTO) plus favorites-only additive attributes.
 jsonDefinition = {
   id:          notNull(),
+  name:        notNull(),
+  group: {
+    id:        notNull(),
+    name:      notNull()
+  },
   playerId:    notNull(),
-  groupNumber: notNull(),
   gameName:    notNull(),
-  wagerName:   notNull(),
   flags:       notNull(),
   createdAt:   notNull(),
-  wager:       notNull()
+  wager: {
+    type:          "NORMAL",
+    gameName:      notNull(),
+    price:         notNull(),
+    duration:      notNull(),
+    drawNames:     notNull(),
+    boards:        notNull()
+  }
 };

@@ -61,8 +61,8 @@ class FavoritesValidationTest extends AbstractRestTest {
     }
 
     @Test
-    void createWagerWithMissingGroupNumber_returns400() {
-        String body = "{\"wagerName\":\"x\",\"wager\":{\"gameName\":\"LOTTO\",\"stake\":1,\"price\":1,\"duration\":1,\"serialNumber\":\"S1\"}}";
+    void createWagerWithMissingBoards_returns400() {
+        String body = "{\"name\":\"x\",\"wager\":{\"gameName\":\"LOTTO\",\"stake\":1,\"price\":1,\"duration\":1}}";
 
         ResponseEntity<String> response = restTemplate.exchange(
                 "/v1/draw-games/favorite-wagers/wagers",
@@ -74,11 +74,12 @@ class FavoritesValidationTest extends AbstractRestTest {
     }
 
     @Test
-    void createGroupWithMissingGroupNumber_returns400() {
-        String body = "{\"groupName\":\"My Group\"}";
+    void createWagerWithBoardWithoutSelections_returns400() {
+        String body = "{\"name\":\"x\",\"wager\":{\"gameName\":\"LOTTO\",\"stake\":1,\"price\":1," +
+                "\"duration\":1,\"boards\":[{\"quickpick\":false}]}}";
 
         ResponseEntity<String> response = restTemplate.exchange(
-                "/v1/draw-games/favorite-wagers/groups",
+                "/v1/draw-games/favorite-wagers/wagers",
                 HttpMethod.POST,
                 new HttpEntity<>(body, asPlayer(PLAYER)),
                 String.class);
@@ -87,9 +88,40 @@ class FavoritesValidationTest extends AbstractRestTest {
     }
 
     @Test
-    void createGroupWithInvalidGroupNumber_returns400() {
-        // Group number must be numeric string (parsed to int by validator)
-        String body = "{\"groupNumber\":\"not-a-number\",\"groupName\":\"My Group\"}";
+    void createWagerLegacyBodyGroupByNameOnly_returns200() {
+        // legacy front-end bodies reference the group by name only — the service
+        // resolves or creates it
+        String body = "{\"name\":\"Legacy Fave\",\"group\":{\"name\":\"Validation Group\"}," +
+                "\"wager\":{\"gameName\":\"LOTTO\",\"stake\":1,\"price\":1,\"duration\":1," +
+                "\"boards\":[{\"primarySelections\":[\"1\",\"2\",\"3\"]}]}}";
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/v1/draw-games/favorite-wagers/wagers",
+                HttpMethod.POST,
+                new HttpEntity<>(body, asPlayer(PLAYER)),
+                String.class);
+
+        assertEquals(200, response.getStatusCode().value());
+    }
+
+    @Test
+    void createGroupLegacyNameOnlyBody_returns200() {
+        // the legacy group create body is {"name": "..."} — the slot number is auto-assigned
+        String body = "{\"name\":\"My Group\"}";
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/v1/draw-games/favorite-wagers/groups",
+                HttpMethod.POST,
+                new HttpEntity<>(body, asPlayer(PLAYER)),
+                String.class);
+
+        assertEquals(200, response.getStatusCode().value());
+    }
+
+    @Test
+    void createGroupWithInvalidId_returns400() {
+        // Group id must be numeric string (parsed to int by validator)
+        String body = "{\"id\":\"not-a-number\",\"name\":\"My Group\"}";
 
         ResponseEntity<String> response = restTemplate.exchange(
                 "/v1/draw-games/favorite-wagers/groups",

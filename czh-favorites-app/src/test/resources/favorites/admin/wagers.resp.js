@@ -1,4 +1,5 @@
+// Legacy list wrapper (gisorch FavoriteWagerPageDTO) via the admin read path.
 jsonDefinition = {
-  items:      notNull(),
-  totalCount: notNull()
+  favoriteWagers: notNull(),
+  totalCount:      notNull()
 };

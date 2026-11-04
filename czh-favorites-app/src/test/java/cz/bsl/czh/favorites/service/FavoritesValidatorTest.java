@@ -2,8 +2,10 @@ package cz.bsl.czh.favorites.service;
 
 // Grep anchor: favorites
 
+import cz.bsl.czh.favorites.api.BoardDto;
 import cz.bsl.czh.favorites.api.FavoriteGroupDto;
 import cz.bsl.czh.favorites.api.FavoriteWagerDto;
+import cz.bsl.czh.favorites.api.FavoriteWagerGroupDto;
 import cz.bsl.czh.favorites.api.WagerDto;
 import cz.bsl.favorites.config.FavoritesProperties;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -35,7 +38,6 @@ class FavoritesValidatorTest {
     @Test
     void validateWager_nullWagerSubObject_throws() {
         FavoriteWagerDto dto = new FavoriteWagerDto();
-        dto.setGroupNumber("1");
         assertThrows(IllegalArgumentException.class, () -> validator.validateWager(dto));
     }
 
@@ -52,34 +54,126 @@ class FavoritesValidatorTest {
     }
 
     @Test
-    void validateWager_wagerNameTooLong_throws() {
+    void validateWager_nameTooLong_throws() {
         FavoriteWagerDto dto = wagerDto("LOTTO", "1");
-        dto.setWagerName("W".repeat(256));
+        dto.setName("W".repeat(256));
         assertThrows(IllegalArgumentException.class, () -> validator.validateWager(dto));
     }
 
     @Test
-    void validateWager_groupNumberNonNumeric_throws() {
+    void validateWager_groupIdNonNumeric_throws() {
         FavoriteWagerDto dto = wagerDto("LOTTO", "abc");
         assertThrows(IllegalArgumentException.class, () -> validator.validateWager(dto));
     }
 
     @Test
-    void validateWager_groupNumberBelowMin_throws() {
+    void validateWager_groupIdBelowMin_throws() {
         FavoriteWagerDto dto = wagerDto("LOTTO", "0");
         assertThrows(IllegalArgumentException.class, () -> validator.validateWager(dto));
     }
 
     @Test
-    void validateWager_groupNumberAboveMax_throws() {
+    void validateWager_groupIdAboveMax_throws() {
         FavoriteWagerDto dto = wagerDto("LOTTO", "11");
         assertThrows(IllegalArgumentException.class, () -> validator.validateWager(dto));
     }
 
     @Test
+    void validateWager_groupNameTooLong_throws() {
+        FavoriteWagerDto dto = wagerDto("LOTTO", "1");
+        dto.getGroup().setName("G".repeat(256));
+        assertThrows(IllegalArgumentException.class, () -> validator.validateWager(dto));
+    }
+
+    @Test
+    void validateWager_withoutGroup_isValid() {
+        // legacy front end always sends a group, but the service must resolve/create
+        // one when absent (auto-assign) — validation passes
+        FavoriteWagerDto dto = new FavoriteWagerDto();
+        dto.setName("N");
+        dto.setWager(wager("LOTTO"));
+        assertDoesNotThrow(() -> validator.validateWager(dto));
+    }
+
+    @Test
+    void validateWager_groupWithoutId_isValid() {
+        FavoriteWagerDto dto = wagerDto("LOTTO", null);
+        dto.getGroup().setName("Sportka Group");
+        assertDoesNotThrow(() -> validator.validateWager(dto));
+    }
+
+    @Test
     void validateWager_valid_noException() {
         FavoriteWagerDto dto = wagerDto("LOTTO", "5");
-        validator.validateWager(dto);
+        assertDoesNotThrow(() -> validator.validateWager(dto));
+    }
+
+    // --- validateWager: boards ---
+
+    @Test
+    void validateWager_nullBoards_throws() {
+        FavoriteWagerDto dto = new FavoriteWagerDto();
+        WagerDto wager = wager("LOTTO");
+        wager.setBoards(null);
+        dto.setWager(wager);
+        assertThrows(IllegalArgumentException.class, () -> validator.validateWager(dto));
+    }
+
+    @Test
+    void validateWager_emptyBoards_throws() {
+        FavoriteWagerDto dto = new FavoriteWagerDto();
+        WagerDto wager = wager("LOTTO");
+        wager.setBoards(List.of());
+        dto.setWager(wager);
+        assertThrows(IllegalArgumentException.class, () -> validator.validateWager(dto));
+    }
+
+    @Test
+    void validateWager_boardWithoutSelections_throws() {
+        FavoriteWagerDto dto = new FavoriteWagerDto();
+        WagerDto wager = wager("LOTTO");
+        BoardDto empty = new BoardDto();
+        empty.setQuickpick(false);
+        wager.setBoards(List.of(empty));
+        dto.setWager(wager);
+        assertThrows(IllegalArgumentException.class, () -> validator.validateWager(dto));
+    }
+
+    @Test
+    void validateWager_boardWithPrimarySelections_isValid() {
+        FavoriteWagerDto dto = new FavoriteWagerDto();
+        WagerDto wager = wager("Sportka");
+        BoardDto board = new BoardDto();
+        board.setPrimarySelections(List.of("1", "2", "3", "4", "5", "6"));
+        wager.setBoards(List.of(board));
+        dto.setWager(wager);
+        assertDoesNotThrow(() -> validator.validateWager(dto));
+    }
+
+    @Test
+    void validateWager_boardWithMultipleSelections_isValid() {
+        FavoriteWagerDto dto = new FavoriteWagerDto();
+        WagerDto wager = wager("Keno");
+        BoardDto board = new BoardDto();
+        board.setPrimaryMultipleSelections(List.of(List.of("1", "2"), List.of("3", "4")));
+        wager.setBoards(List.of(board));
+        dto.setWager(wager);
+        assertDoesNotThrow(() -> validator.validateWager(dto));
+    }
+
+    @Test
+    void validateWager_addonBoardsValidatedToo_throwsOnEmptyAddonBoard() {
+        FavoriteWagerDto dto = new FavoriteWagerDto();
+        WagerDto wager = wager("Sportka");
+        wager.setBoards(List.of(boardWithSelections()));
+
+        WagerDto addon = new WagerDto();
+        addon.setGameName("Sance");
+        addon.setBoards(List.of());
+        wager.setAddonWagers(List.of(addon));
+
+        dto.setWager(wager);
+        assertThrows(IllegalArgumentException.class, () -> validator.validateWager(dto));
     }
 
     // --- validateGroup ---
@@ -90,42 +184,48 @@ class FavoritesValidatorTest {
     }
 
     @Test
-    void validateGroup_nullGroupName_throws() {
+    void validateGroup_nullName_throws() {
         FavoriteGroupDto dto = new FavoriteGroupDto();
-        dto.setGroupName(null);
-        dto.setGroupNumber("1");
+        dto.setName(null);
         assertThrows(IllegalArgumentException.class, () -> validator.validateGroup(dto));
     }
 
     @Test
-    void validateGroup_groupNameTooLong_throws() {
+    void validateGroup_nameTooLong_throws() {
         FavoriteGroupDto dto = new FavoriteGroupDto();
-        dto.setGroupName("G".repeat(256));
+        dto.setName("G".repeat(256));
         assertThrows(IllegalArgumentException.class, () -> validator.validateGroup(dto));
     }
 
     @Test
-    void validateGroup_groupNumberNonNumeric_throws() {
+    void validateGroup_idNonNumeric_throws() {
         FavoriteGroupDto dto = new FavoriteGroupDto();
-        dto.setGroupName("Group A");
-        dto.setGroupNumber("xyz");
+        dto.setName("Group A");
+        dto.setId("xyz");
         assertThrows(IllegalArgumentException.class, () -> validator.validateGroup(dto));
     }
 
     @Test
     void validateGroup_valid_noException() {
         FavoriteGroupDto dto = new FavoriteGroupDto();
-        dto.setGroupName("My Group");
-        dto.setGroupNumber("3");
-        validator.validateGroup(dto);
+        dto.setName("My Group");
+        dto.setId("3");
+        assertDoesNotThrow(() -> validator.validateGroup(dto));
     }
 
     @Test
-    void validateGroup_emptyGroupName_noException() {
+    void validateGroup_legacyBodyNameOnly_noException() {
+        // the legacy group create body is {"name": "V Group"} — no id (auto-assigned)
         FavoriteGroupDto dto = new FavoriteGroupDto();
-        dto.setGroupNumber("1");
-        dto.setGroupName("");
-        validator.validateGroup(dto);
+        dto.setName("V Group");
+        assertDoesNotThrow(() -> validator.validateGroup(dto));
+    }
+
+    @Test
+    void validateGroup_emptyName_noException() {
+        FavoriteGroupDto dto = new FavoriteGroupDto();
+        dto.setName("");
+        assertDoesNotThrow(() -> validator.validateGroup(dto));
     }
 
     // --- validateId ---
@@ -158,12 +258,28 @@ class FavoritesValidatorTest {
 
     // --- helpers ---
 
-    private static FavoriteWagerDto wagerDto(String gameName, String groupNumber) {
+    private static FavoriteWagerDto wagerDto(String gameName, String groupId) {
         FavoriteWagerDto dto = new FavoriteWagerDto();
-        dto.setGroupNumber(groupNumber);
-        WagerDto wager = new WagerDto(gameName, 100L, 100L, 1, null, List.of());
-        dto.setWager(wager);
+        dto.setName("N");
+        dto.setGroup(groupId == null ? new FavoriteWagerGroupDto() : new FavoriteWagerGroupDto(groupId, "G"));
+        dto.setWager(wager(gameName));
         return dto;
+    }
+
+    private static WagerDto wager(String gameName) {
+        WagerDto wager = new WagerDto();
+        wager.setGameName(gameName);
+        wager.setStake(100L);
+        wager.setPrice(100L);
+        wager.setDuration(1);
+        wager.setBoards(List.of(boardWithSelections()));
+        return wager;
+    }
+
+    private static BoardDto boardWithSelections() {
+        BoardDto board = new BoardDto();
+        board.setSelections(List.of("1", "2", "3"));
+        return board;
     }
 
     // --- parseGameNamesCsv ---

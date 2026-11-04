@@ -158,11 +158,11 @@ pass "Java backend up (app $APP_PORT, mgmt $MGMT_PORT)"
 # Paths follow the legacy GIS contract (gateway-paths.md): /{version}/draw-games/favorite-wagers/...
 seed_player=vision-seed-player
 info "Seeding a favorite wager for $seed_player"
-seed_group_body='{"groupNumber":"5","groupName":"Vision Seed Group"}'
+seed_group_body='{"id":"5","name":"Vision Seed Group"}'
 curl -s -o /dev/null -w '%{http_code}' -X POST "http://127.0.0.1:$APP_PORT/v1/draw-games/favorite-wagers/groups" \
     -H 'Content-Type: application/json' -H "X-Player-Id: $seed_player" \
     -d "$seed_group_body" >/dev/null
-seed_wager_body='{"groupNumber":"5","wagerName":"Vision Seed Wager","wager":{"gameName":"LOTTO","stake":1,"price":1,"duration":1,"serialNumber":"VIS1","boards":[[1,2,3]]}}'
+seed_wager_body='{"name":"Vision Seed Wager","group":{"id":"5","name":"Vision Seed Group"},"wager":{"type":"NORMAL","gameName":"LOTTO","stake":1,"price":1,"duration":1,"serialNumber":"VIS1","boards":[{"primarySelections":["1","2","3"]}]}}'
 curl -s -o /dev/null -w '%{http_code}' -X POST "http://127.0.0.1:$APP_PORT/v1/draw-games/favorite-wagers/wagers" \
     -H 'Content-Type: application/json' -H "X-Player-Id: $seed_player" \
     -d "$seed_wager_body" >/dev/null
@@ -281,7 +281,7 @@ assert_body_contains $base_url/favorites-mgmt/ '<meta name="vision-base" content
 
 # 4. Admin API through the GUI's context (/favorites-mgmt/admin -> app port 9290). The admin
 #    wagers endpoint needs no X-Player-Id header (playerId is a path param); it returns JSON with
-#    items + totalCount. The GUI fetches /admin through its own context, which routes to the app port.
+#    favoriteWagers + totalCount (legacy wire names). The GUI fetches /admin through its own context, which routes to the app port.
 assert_status "$base_url/favorites-mgmt/admin/v1/player/$seed_player/draw-games/favorite-wagers/wagers" 200 "GET /favorites-mgmt/admin wagers (GUI's admin context)"
 assert_body_contains "$base_url/favorites-mgmt/admin/v1/player/$seed_player/draw-games/favorite-wagers/wagers" '"totalCount"' "GUI-context admin wagers JSON"
 # The bare /favorites/ context also routes to the app port (direct/cron access).

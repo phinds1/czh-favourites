@@ -11,10 +11,14 @@
 | Config properties        | FavoritesProperties          | czh-favorites-app     | cz.bsl.favorites.config             | czh-favorites-app/src/main/java/cz/bsl/favorites/config/FavoritesProperties.java          |
 | DataSource (DB2/H2)      | DataSourceConfig             | czh-favorites-app     | cz.bsl.favorites.config             | czh-favorites-app/src/main/java/cz/bsl/favorites/config/DataSourceConfig.java             |
 | Favorite wager API DTO   | FavoriteWagerDto             | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteWagerDto.java            |
+| Wager group ref (id+name)| FavoriteWagerGroupDto        | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteWagerGroupDto.java      |
 | Favorite group API DTO   | FavoriteGroupDto             | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteGroupDto.java            |
 | Wager sub-object (JSON)  | WagerDto                     | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/WagerDto.java                    |
+| Board sub-object         | BoardDto                     | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/BoardDto.java                    |
+| Wager DTO closure        | StakeDto, TaxDto, TextDto, AddressDto, IdDocumentDto, PrizeDto, PromotionDto, TicketSecurityDto, ErrorDto, FieldErrorDto, WagerType, PrizeStatus, PrizeType | czh-favorites-api | cz.bsl.czh.favorites.api | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/ (mirrors of gisorch; see bin/dto-drift-check.py) |
 | Wager list response      | FavoriteWagerPageDto         | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteWagerPageDto.java        |
 | Group list response      | FavoriteGroupPageDto         | czh-favorites-api     | cz.bsl.czh.favorites.api            | czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteGroupPageDto.java        |
+| DTO drift check (script) | dto-drift-check.py           | (bash/python)        | (tool)                              | bin/dto-drift-check.py                                                                   |
 | Test DB schema config    | TestDatabaseConfig           | czh-favorites-app     | cz.bsl.czh.favorites.config (test)  | czh-favorites-app/src/test/java/cz/bsl/czh/favorites/config/TestDatabaseConfig.java       |
 | JSON test utils          | JamcrestUtils                | czh-favorites-app     | cz.bsl.czh.favorites.test           | czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/JamcrestUtils.java              |
 | Base REST integration    | AbstractRestTest             | czh-favorites-app     | cz.bsl.czh.favorites.test           | czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/AbstractRestTest.java           |
@@ -51,8 +55,12 @@
 
 ```
 czh-favorites-api/   cz.bsl.czh.favorites.api    JSON request/response DTOs; no Spring, no DB.
-                                                   WagerDto is the WAGER_JSON blob shape.
-                                                   Page wrappers carry items + totalCount.
+                                                   WagerDto (+BoardDto and the wager closure) mirrors
+                                                   the front-end gisorch WagerDTO - WAGER_JSON blob shape.
+                                                   Wire contract: id/name strings, group {id,name},
+                                                   favoriteWagers/favoriteWagerGroups wrappers.
+                                                   Favorites extensions: @JsonIgnoreProperties(ignoreUnknown),
+                                                   @JsonInclude(NON_NULL); see .requirements/design/dto-alignment-baseline.md.
 
 czh-favorites-app/   cz.bsl.favorites             FavoritesApplication (@SpringBootApplication)
                      cz.bsl.favorites.config      FavoritesProperties (@ConfigurationProperties
@@ -149,10 +157,14 @@ favorites-properties   → czh-favorites-app/src/main/java/cz/bsl/favorites/conf
 favorites-datasource   → czh-favorites-app/src/main/java/cz/bsl/favorites/config/DataSourceConfig.java
 
 FavoriteWagerDto       → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteWagerDto.java
+FavoriteWagerGroupDto  → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteWagerGroupDto.java
 FavoriteGroupDto       → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteGroupDto.java
 WagerDto                → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/WagerDto.java
+BoardDto                → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/BoardDto.java
+wager-dto-closure      → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/ (StakeDto, TaxDto, TextDto, AddressDto, IdDocumentDto, PrizeDto, PromotionDto, TicketSecurityDto, ErrorDto, FieldErrorDto, WagerType, PrizeStatus, PrizeType)
 FavoriteWagerPageDto   → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteWagerPageDto.java
 FavoriteGroupPageDto   → czh-favorites-api/src/main/java/cz/bsl/czh/favorites/api/FavoriteGroupPageDto.java
+dto-drift-check        → bin/dto-drift-check.py
 
 FavoritesGroupDao      → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesGroupDaoImpl.java
 FavoritesWagerDao      → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/dao/FavoritesWagerDaoImpl.java
@@ -166,6 +178,8 @@ TestDatabaseConfig      → czh-favorites-app/src/test/java/cz/bsl/czh/favorites
 JamcrestUtils           → czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/JamcrestUtils.java
 AbstractRestTest        → czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/AbstractRestTest.java
 FavoritesRestSmokeTest → czh-favorites-app/src/test/java/cz/bsl/czh/favorites/test/FavoritesRestSmokeTest.java
+LegacySportkaRoundTripTest → czh-favorites-app/src/test/java/cz/bsl/favorites/web/LegacySportkaRoundTripTest.java (acceptance: legacy sportka.json flow)
+legacy-fixtures         → czh-favorites-api/src/test/resources/legacy/ (byte-identical legacy bodies)
 
 FavoritesService       → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/FavoritesService.java
 DefaultFavoritesService → czh-favorites-app/src/main/java/cz/bsl/czh/favorites/service/DefaultFavoritesService.java

@@ -1,12 +1,24 @@
+// Legacy front-end favorite-wager update body (gisorch wire contract).
+// Parameters: groupNumber (slot id), gameName.
 t = {
-  groupNumber: groupNumber,
-  wagerName: "Updated Name",
+  name: "Updated Name",
+  group: {
+    id: groupNumber,
+    name: "My Lotto Group"
+  },
   wager: {
-    gameName: gameName,
-    stake: 200,
-    price: 200,
+    type: "NORMAL",
     duration: 2,
-    serialNumber: "SN002",
-    boards: [[7, 8, 9]]
+    drawNames: ["WED", "FRI", "SUN"],
+    gameName: gameName,
+    price: 200,
+    boards: [
+      {
+        systemBetType: "default",
+        betType: "NORMAL",
+        quickpick: false,
+        primarySelections: ["7", "8", "9"]
+      }
+    ]
   }
 };
